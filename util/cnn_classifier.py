@@ -53,7 +53,8 @@ def define_scope(function, scope=None, *args, **kwargs):
 
 
 class CnnClassifier:
-    def __init__(self, train, test, params):
+    def __init__(self, train, test, classes, params):
+        self.classes = classes
         self.params = params
 
         self.image = tf.placeholder(tf.float32, [
@@ -78,16 +79,16 @@ class CnnClassifier:
                                            class_size=self.params['CLASS_SIZE'])
         self.train_batch = self.batches.gen_train()
         self.valid_batch = self.batches.gen_valid()
-        self.test_batch = self.batches.gen_test()
         self.valid_batch_one, i = self.valid_batch.next()
 
         self.net = {}
         self.prediction
         self.optimize
         self.error
+        self.loss
         self.min_loss = 1e99
         self.saver = tf.train.Saver()
-        self.last_ckpt, self.last_params = None, None
+        self.last_ckpt, self.last_params, self.last_results = None, None, None
 
         self.sess = tf.Session()
         self.sess.run(tf.global_variables_initializer())
@@ -112,12 +113,24 @@ class CnnClassifier:
             'out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='b_out')
         }
         x = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
-        return x
+        return self.prediction_to_probability(x)
+        #return tf.nn.softmax_cross_entropy_with_logits(x, self.label)
+
+
+    def prediction_to_probability(self, pred):
+        pred = tf.clip_by_value(pred, 1e-15, 1-1e-15)
+        pred = tf.div(pred, tf.reduce_sum(pred, 1, True))
+        return pred
+
 
     @define_scope
     def optimize(self):
-        self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(self.prediction, self.label))
-        self.optimizer = tf.train.AdamOptimizer(learning_rate=self.params['LEARNING_RATE']).minimize(self.cost)
+        self.loss = tf.reduce_mean(-tf.reduce_sum(self.label * tf.log(self.prediction), reduction_indices=[1]))
+
+        print self.loss
+        #self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(self.prediction, self.label))
+
+        self.optimizer = tf.train.AdamOptimizer(learning_rate=self.params['LEARNING_RATE']).minimize(self.loss)
         return self.optimizer
 
     @define_scope
@@ -142,20 +155,19 @@ class CnnClassifier:
             })
             if i % self.params['report_interval'] == 0:
                 # Calculate batch loss and accuracy
-                batch_loss, batch_acc = self.sess.run([self.cost, self.accuracy], feed_dict={
+                batch_loss, batch_acc = self.sess.run([self.loss, self.accuracy], feed_dict={
                     self.image: batch['images'],
                     self.label: batch['ts'],
                     self.keep_prob: 1.
                 })
-                valid_loss, valid_acc = self.sess.run([self.cost, self.accuracy], feed_dict={
+                valid_loss, valid_acc = self.sess.run([self.loss, self.accuracy], feed_dict={
                     self.image: self.valid_batch_one['images'],
                     self.label: self.valid_batch_one['ts'],
                     self.keep_prob: 1.
                 })
                 print "%d\t%.4f\t\t%.4f\t\t%.4f\t\t%.4f\t\t%.4f\n" % (i, batch_loss, batch_acc, valid_loss, valid_acc, time.time() - time_last)
-                #self.save(valid_loss, i)
-                pred = self.run_against_test()
-                self.save_results(valid_loss, i, pred)
+                self.save_results(valid_loss, i)
+                self.save_params(valid_loss, i)
 
 
                 time_last = time.time()
@@ -167,7 +179,7 @@ class CnnClassifier:
     def run_against_test(self):
         preds_test = []
         ids_test = []
-        for batch, num in self.test_batch:
+        for batch, num in self.batches.gen_test():
             res_test = self.sess.run([self.prediction], feed_dict={
                 self.image: batch['images'],
                 self.keep_prob: 1
@@ -179,10 +191,13 @@ class CnnClassifier:
             preds_test.append(y_out)
         ids_test = list(itertools.chain.from_iterable(ids_test))
         print [e.shape for e in preds_test]
-        preds_test = np.concatenate(preds_test)
-        print len(ids_test), len(preds_test)
+        print 'type(preds_test): ', type(preds_test)
+        print 'type(preds_test[0]): ', type(preds_test[0])
+        preds_test = np.concatenate(tuple(preds_test), axis=0)
+        print 'len(ids_test): ', len(ids_test)
+        print 'len(preds_test): ', len(preds_test)
         assert len(ids_test) == len(preds_test)
-        return preds_test
+        return ids_test, preds_test
 
 
     def save_checkpoint(self, valid_loss, iteration):
@@ -214,12 +229,13 @@ class CnnClassifier:
                     print 'deleted params at %s' % self.last_params
                 self.last_params = current_params
 
-    def save_results(self, valid_loss, iteration, preds_test):
+    def save_results(self, valid_loss, iteration):
         if valid_loss < self.min_loss:
             self.min_loss = valid_loss
-            preds_test = self.run_against_test()
+            ids_test, preds_test = self.run_against_test()
 
-            preds_df = pd.DataFrame(preds_test, columns=data.le.classes_)
+            preds_df = pd.DataFrame(preds_test, columns=self.classes.classes_[:10])
+            preds_df = preds_df.div(preds_df.sum(axis=1), axis=0)
             ids_test_df = pd.DataFrame(ids_test, columns=["id"])
             submission = pd.concat([ids_test_df, preds_df], axis=1)
             current_results = './tmp/results/results_%f_%i_%s.csv' % (valid_loss, iteration, datetime.now().isoformat())
@@ -241,6 +257,9 @@ if __name__ == '__main__':
         train = pickle.load(f)
     with open('./data/test.pickle', 'rb') as f:
         test = pickle.load(f)
+    with open('./data/le.pickle', 'rb') as f:
+        classes = pickle.load(f)
+
 
     BATCH_SIZE = 64
     NUM_CLASSES = 99
@@ -272,6 +291,6 @@ if __name__ == '__main__':
         'LEARNING_RATE': 0.0005,
         'report_interval': 1
     }
-    model = CnnClassifier(train, test, params)
+    model = CnnClassifier(train, test, classes, params)
     model.train()
 
