@@ -48,3 +48,42 @@ def conv_net(x, weights, biases, dropout, net):
     return net['out']
 
 
+def random_search(params_range, samplings, iterations=1e8):
+    for instance in range(samplings):
+        params = {}
+        for param_name, value in params_range.items():
+            if type(value) == tuple:
+                base, dist = value
+                if base == 0:
+                    params[param_name] = dist.rvs()
+                else:
+                    params[param_name] = base ** dist.rvs()
+            else:
+                params[param_name] = value
+        print json.dumps(params, indent=2)
+        #model = cnn_classifier.CnnClassifier(train, test, classes, params)
+        #model.train(iterations)
+
+
+if __name__ == '__main__':
+    params_range = {
+	'conv1_num': (0, randint(1, 10)),
+	'conv1_out': (2, randint(2, 8)),
+	'conv2_num': (0, randint(1, 10)),
+	'conv2_out': (2, randint(2, 8)),
+	'd_out': (2, randint(4, 10)),
+	'dropout': (0, uniform(0, 1.0)),
+	'HEIGHT': 128,
+	'WIDTH': 128,
+	'CHANNEL': 1,
+	'BATCH_SIZE': 64,
+	'NUM_CLASSES': 99,
+	'VALIDATION_SIZE': VALIDATION_SIZE,
+	'SEED': SEED,
+	'TRAIN_SIZE': TRAIN_SIZE,
+	'CLASS_SIZE': 0.1,
+	'ITERATIONS': ITERATIONS,
+	'LEARNING_RATE': (10, randint(-6, 1)),
+	'report_interval': 1
+    }
+    random_search(params_range, 5)
