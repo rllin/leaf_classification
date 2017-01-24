@@ -1,3 +1,9 @@
+import json
+
+from scipy.stats import randint, uniform
+from skimage.io import imread, imshow
+from skimage.transform import resize
+from skimage.util import pad
 import tensorflow as tf
 
 # Create some wrappers for simplicity
@@ -46,6 +52,26 @@ def conv_net(x, weights, biases, dropout, net):
 
 
     return net['out']
+
+def pad_upto(image, (target_height, target_width)):
+    h, w = image.shape
+    up, left = (target_height - h) / 2, (target_width - w) / 2
+    down, right = target_height - h - up, target_width - w - left
+    return pad(image, ((up, down), (left, right)), 'constant')
+
+def resize_proportionally(image, (target_height, target_width)):
+    h, w = image.shape
+    h_mul, w_mul = target_height / float(h), target_width / float(w)
+    if h_mul > w_mul:
+        scaled = resize(image, (int(w_mul * h), target_width), mode='constant')
+        print scaled.shape
+    else:
+        scaled = resize(image, (target_height, int(h_mul * w)), mode='constant')
+    return pad_upto(scaled, (target_height, target_width))
+
+def scale_resize(image, (max_height, max_width), (target_height, target_width)):
+    return resize(resize_proportionally(image, (max_height, max_width)), (target_height, target_width))
+
 
 
 def random_search(params_range, samplings, iterations=1e8):

@@ -106,7 +106,7 @@ class load_data():
             if t_train is not None:
                 sample['t'] = np.asarray(t_train[i], dtype='int32')
             image = imread(row['image'], as_grey=True)
-            image = resize(image, output_shape=image_shape)
+            image = helpers.scale_resize(image, (1706, 1706), (1706, 1706))
             image = np.expand_dims(image, axis=2)
             sample['image'] = image
             data[row['id']] = sample
