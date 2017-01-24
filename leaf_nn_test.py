@@ -61,7 +61,7 @@ params = {
     'report_interval': 1
 }
 model = cnn_classifier.CnnClassifier(train, test, classes, params)
-model.train(1)
+model.train(20)
 
 
 

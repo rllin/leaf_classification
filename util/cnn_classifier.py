@@ -83,6 +83,7 @@ class CnnClassifier:
 
         self.net = {}
         self.prediction
+        self.probability
         self.optimize
         self.error
         self.loss
@@ -113,23 +114,18 @@ class CnnClassifier:
             'out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='b_out')
         }
         x = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
-        return self.prediction_to_probability(x)
+        #return self.prediction_to_probability(x)
         #return tf.nn.softmax_cross_entropy_with_logits(x, self.label)
+        return x
 
-
-    def prediction_to_probability(self, pred):
-        pred = tf.clip_by_value(pred, 1e-15, 1-1e-15)
-        pred = tf.div(pred, tf.reduce_sum(pred, 1, True))
-        return pred
-
+    @define_scope
+    def probability(self):
+        return tf.nn.softmax(self.prediction)
 
     @define_scope
     def optimize(self):
-        self.loss = tf.reduce_mean(-tf.reduce_sum(self.label * tf.log(self.prediction), reduction_indices=[1]))
-
-        print self.loss
-        #self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(self.prediction, self.label))
-
+        #self.loss = -tf.reduce_mean(tf.reduce_sum(self.label * tf.log(tf.clip_by_value(self.prediction, 1e-15, 1-1e-15)), reduction_indices=[1]))
+        self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(self.prediction, self.label))
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.params['LEARNING_RATE']).minimize(self.loss)
         return self.optimizer
 
@@ -180,7 +176,7 @@ class CnnClassifier:
         preds_test = []
         ids_test = []
         for batch, num in self.batches.gen_test():
-            res_test = self.sess.run([self.prediction], feed_dict={
+            res_test = self.sess.run([self.probability], feed_dict={
                 self.image: batch['images'],
                 self.keep_prob: 1
             })
@@ -190,12 +186,8 @@ class CnnClassifier:
                 y_out = y_out[:num]
             preds_test.append(y_out)
         ids_test = list(itertools.chain.from_iterable(ids_test))
-        print [e.shape for e in preds_test]
-        print 'type(preds_test): ', type(preds_test)
-        print 'type(preds_test[0]): ', type(preds_test[0])
         preds_test = np.concatenate(tuple(preds_test), axis=0)
-        print 'len(ids_test): ', len(ids_test)
-        print 'len(preds_test): ', len(preds_test)
+        print len(ids_test), len(preds_test)
         assert len(ids_test) == len(preds_test)
         return ids_test, preds_test
 
