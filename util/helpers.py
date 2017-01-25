@@ -64,7 +64,6 @@ def resize_proportionally(image, (target_height, target_width)):
     h_mul, w_mul = target_height / float(h), target_width / float(w)
     if h_mul > w_mul:
         scaled = resize(image, (int(w_mul * h), target_width), mode='constant')
-        print scaled.shape
     else:
         scaled = resize(image, (target_height, int(h_mul * w)), mode='constant')
     return pad_upto(scaled, (target_height, target_width))
@@ -74,21 +73,21 @@ def scale_resize(image, (max_height, max_width), (target_height, target_width)):
 
 
 
-def random_search(params_range, samplings, iterations=1e8):
+def random_search(params_range, samplings):
+    params = [None,] * samplings
     for instance in range(samplings):
-        params = {}
+        param = {}
         for param_name, value in params_range.items():
             if type(value) == tuple:
                 base, dist = value
                 if base == 0:
-                    params[param_name] = dist.rvs()
+                    param[param_name] = dist.rvs()
                 else:
-                    params[param_name] = base ** dist.rvs()
+                    param[param_name] = base ** dist.rvs()
             else:
-                params[param_name] = value
-        print json.dumps(params, indent=2)
-        #model = cnn_classifier.CnnClassifier(train, test, classes, params)
-        #model.train(iterations)
+                param[param_name] = value
+        params[instance] = param
+    return params
 
 
 if __name__ == '__main__':

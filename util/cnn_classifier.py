@@ -165,7 +165,6 @@ class CnnClassifier:
                 self.save_results(valid_loss, i)
                 self.save_params(valid_loss, i)
 
-
                 time_last = time.time()
             if i >= iterations:
                 break

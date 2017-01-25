@@ -17,6 +17,7 @@ from sklearn.cross_validation import StratifiedShuffleSplit
 from skimage.io import imread
 from skimage.transform import resize
 
+import helpers
 
 def onehot(t, num_classes):
     out = np.zeros((t.shape[0], num_classes))
@@ -106,7 +107,7 @@ class load_data():
             if t_train is not None:
                 sample['t'] = np.asarray(t_train[i], dtype='int32')
             image = imread(row['image'], as_grey=True)
-            image = helpers.scale_resize(image, (1706, 1706), (1706, 1706))
+            image = helpers.scale_resize(image, (1706, 1706), image_shape)
             image = np.expand_dims(image, axis=2)
             sample['image'] = image
             data[row['id']] = sample
