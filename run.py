@@ -18,7 +18,7 @@ from skimage.transform import resize
 
 from scipy.stats import randint, uniform
 
-from util import etl, helpers
+from util import etl, helpers, cnn_classifier
 
 TRAIN_PATH = "./data/train.csv"
 TEST_PATH = "./data/test.csv"
@@ -59,7 +59,7 @@ def run(params_range, samplings=5):
                              test_path=TEST_PATH,
                              image_paths=IMAGE_PATHS,
                              image_shape=(param['HEIGHT'], param['WIDTH']))
-        model = CnnClassifier(data.train, data.test, data.classses, param)
+        model = cnn_classifier.CnnClassifier(data.train, data.test, data.classses, param)
         model.train(param['ITERATIONS'])
 
 if __name__ == '__main__':
