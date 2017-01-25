@@ -36,8 +36,8 @@ params_range = {
     'conv2_out': (2, randint(2, 8)),
     'd_out': (2, randint(4, 10)),
     'dropout': (0, uniform(0, 1.0)),
-    'HEIGHT': (0, randint(170, 1700)),
-    'WIDTH': (0, randint(170, 1700)),
+    'HEIGHT': np.arange(128, 1708, 4),    # muultiple of 4 because of two k=2
+    'WIDTH': np.arange(128, 1708, 4),
     'CHANNEL': 1,
     'BATCH_SIZE': 64,
     'NUM_CLASSES': 99,

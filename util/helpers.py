@@ -50,8 +50,10 @@ def conv_net(x, weights, biases, dropout, net):
     print net['fc1'].get_shape()
     print net['out'].get_shape()
 
-
     return net['out']
+
+
+
 
 def pad_upto(image, (target_height, target_width)):
     h, w = image.shape
@@ -84,6 +86,8 @@ def random_search(params_range, samplings):
                     param[param_name] = dist.rvs()
                 else:
                     param[param_name] = base ** dist.rvs()
+            elif type(value) == np.ndarray:
+                param[param_name] = np.random.choice(value)
             else:
                 param[param_name] = value
         params[instance] = param
@@ -91,6 +95,10 @@ def random_search(params_range, samplings):
 
 
 if __name__ == '__main__':
+    VALIDATION_SIZE = 0.1
+    SEED = 42
+    TRAIN_SIZE = 1.0
+    ITERATIONS = 1e1
     params_range = {
 	'conv1_num': (0, randint(1, 10)),
 	'conv1_out': (2, randint(2, 8)),
@@ -111,4 +119,5 @@ if __name__ == '__main__':
 	'LEARNING_RATE': (10, randint(-6, 1)),
 	'report_interval': 1
     }
-    random_search(params_range, 5)
+    a = random_search(params_range, 5)
+    print a[0]
