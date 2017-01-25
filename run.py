@@ -59,7 +59,7 @@ def run(params_range, samplings=5):
                              test_path=TEST_PATH,
                              image_paths=IMAGE_PATHS,
                              image_shape=(param['HEIGHT'], param['WIDTH']))
-        model = cnn_classifier.CnnClassifier(data.train, data.test, data.classses, param)
+        model = cnn_classifier.CnnClassifier(data.train, data.test, data.le, param)
         model.train(param['ITERATIONS'])
 
 if __name__ == '__main__':
