@@ -14,8 +14,8 @@ import numpy as np
 
 from sklearn.preprocessing import LabelEncoder
 from sklearn.cross_validation import StratifiedShuffleSplit
-from skimage.io import imread
-from skimage.transform import resize
+from skimage.io import imread, imsave
+from skimage.transform import resize, rotate
 
 import helpers
 
@@ -25,7 +25,6 @@ def onehot(t, num_classes):
         out[int(row), int(col)] = 1
     return out
 
-
 class load_data():
     # data_train, data_test and le are public
     def __init__(self, train_path, test_path, image_paths, image_shape=(128, 128), seed=42, verbose_flag=False):
@@ -33,7 +32,7 @@ class load_data():
         random.seed(self._seed)
 
         self._verbose_flag = verbose_flag
-        train_df = pd.read_csv(train_path)
+        train_df = pd.read_csv(train_path, usecols=['id', 'species'])
         test_df = pd.read_csv(test_path)
         image_paths = image_paths
         image_shape = image_shape
@@ -55,15 +54,15 @@ class load_data():
         path_dict = self._path_to_dict(image_paths) # numerate image paths and make it a dict
         # merge image paths with data frame
 
-        train_image_df = self._merge_image_df(train_df, path_dict)
-        test_image_df = self._merge_image_df(test_df, path_dict)
+        self.train_image_df = self._merge_image_df(train_df, path_dict)
+        self.test_image_df = self._merge_image_df(test_df, path_dict)
         # label encoder-decoder (self. because we need it later)
-        self.le = LabelEncoder().fit(train_image_df['species'])
+        self.le = LabelEncoder().fit(self.train_image_df['species'])
         # labels for train
-        t_train = self.le.transform(train_image_df['species'])
+        t_train = self.le.transform(self.train_image_df['species'])
         # getting data
-        train_data = self._make_dataset(train_image_df, image_shape, t_train)
-        test_data = self._make_dataset(test_image_df, image_shape)
+        train_data = self._make_dataset(self.train_image_df, image_shape, t_train)
+        test_data = self._make_dataset(self.test_image_df, image_shape)
         # need to reformat the train for validation split reasons in the batch_generator
         self.train = self._format_dataset(train_data, for_train=True)
         self.test = self._format_dataset(test_data, for_train=False)
@@ -101,14 +100,15 @@ class load_data():
                 features = row.drop(['id', 'species', 'image'], axis=0).values
             else:
                 features = row.drop(['id', 'image'], axis=0).values
-            sample['margin'] = features[:64]
-            sample['shape'] = features[64:128]
-            sample['texture'] = features[128:]
+            #sample['margin'] = features[:64]
+            #sample['shape'] = features[64:128]
+            #sample['texture'] = features[128:]
             if t_train is not None:
                 sample['t'] = np.asarray(t_train[i], dtype='int32')
-            image = imread(row['image'], as_grey=True)
-            image = helpers.scale_resize(image, (1706, 1706), image_shape)
-            image = np.expand_dims(image, axis=2)
+            #image = imread(row['image'], as_grey=True)
+            #image = helpers.scale_resize(image, (1706, 1706), image_shape)
+            #image = np.expand_dims(image, axis=2)
+            image = os.path.splitext(os.path.basename(row['image']))[0]
             sample['image'] = image
             data[row['id']] = sample
             if i % 100 == 0 and self._verbose_flag:
@@ -119,12 +119,13 @@ class load_data():
         # making arrays with all data in, is nessesary when doing validation split
         data = dict()
         value = df.values()[0]
-        img_tot_shp = tuple([len(df)] + list(value['image'].shape))
-        data['images'] = np.zeros(img_tot_shp, dtype='float32')
+        #img_tot_shp = tuple([len(df)] + list(value['image'].shape))
+        #data['images'] = np.zeros(img_tot_shp, dtype='float32')
         feature_tot_shp = (len(df), 64)
-        data['margins'] = np.zeros(feature_tot_shp, dtype='float32')
-        data['shapes'] = np.zeros(feature_tot_shp, dtype='float32')
-        data['textures'] = np.zeros(feature_tot_shp, dtype='float32')
+        data['images'] = np.zeros((len(df),), dtype='int32')
+        #data['margins'] = np.zeros(feature_tot_shp, dtype='float32')
+        #data['shapes'] = np.zeros(feature_tot_shp, dtype='float32')
+        #data['textures'] = np.zeros(feature_tot_shp, dtype='float32')
         if for_train:
             data['ts'] = np.zeros((len(df),), dtype='int32')
         else:
@@ -132,14 +133,40 @@ class load_data():
         for i, pair in enumerate(df.items()):
             key, value = pair
             data['images'][i] = value['image']
-            data['margins'][i] = value['margin']
-            data['shapes'][i] = value['shape']
-            data['textures'][i] = value['texture']
+            #data['margins'][i] = value['margin']
+            #data['shapes'][i] = value['shape']
+            #data['textures'][i] = value['texture']
             if for_train:
                 data['ts'][i] = value['t']
             else:
                 data['ids'][i] = key
         return data
+
+    def _augment_dataset(self, df):
+        '''Run once to augment.  Just read in the future.'''
+        new_dataset = []
+        id_start = df['id'].max() + 1
+        counter = 0
+        for index, row in df.iterrows():
+            image = imread(row['image'], as_grey=True)
+            for angle in [90, 180, 270, 'LR', 'UD']:
+                new_row = dict()
+                new_row['id'] = id_start + counter
+                new_row['species'] = row['species']
+                new_image = '%s/%s%s' % (os.path.dirname(row['image']), new_row['id'], os.path.splitext(row['image'])[1])
+                new_row['image'] = new_image
+                new_dataset.append(new_row)
+                if type(angle) == int:
+                    imsave(new_image, rotate(image, angle, resize=False))
+                elif angle == 'LR':
+                    imsave(new_image, np.fliplr(image))
+                elif angle == 'UD':
+                    imsave(new_image, np.flipud(image))
+                counter += 1
+            print 'augmented: ', row['image']
+        new_df = pd.concat((df, pd.DataFrame(new_dataset)))
+        new_df.to_csv('./data/train_images.csv')
+        return new_df
 
 
 class batch_generator():
@@ -289,5 +316,11 @@ class batch_generator():
                     if iteration >= self._num_iterations:
                         break
 
-
+if __name__ == '__main__':
+    '''
+    for im_path in glob.glob('./data/images/*.jpg'):
+	image = imread(im_path, as_grey=True)
+	new_image = helpers.resize_proportionally(image, (1706, 1706))
+	imsave('./data/standardized_images/%s' % (path.basename(im_path)), new_image)
+    '''
 
