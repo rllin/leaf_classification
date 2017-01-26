@@ -86,7 +86,7 @@ class CnnClassifier:
 
         self.train_batch = self.batches.gen_train()
         self.valid_batch = self.batches.gen_valid()
-        self.valid_batch_one, _ = self.valid_batch.next()
+        #self.valid_batch_one, _ = self.valid_batch.next()
         #self.valid_images = np.expand_dims(np.array([imread(im) for im in self.valid_batch_one['images']]), axis=4)
 
         self.net = {}
@@ -152,30 +152,41 @@ class CnnClassifier:
     def train(self, iterations):
         print "Iter \t Batch Loss \t Batch Accuracy \t Valid Loss \t Valid Accuracy \t Time delta\n"
         time_last = time.time()
+        train_loss, train_acc = [], []
         for i, batch in enumerate(self.train_batch):
             #images = np.expand_dims(np.array([imread(im) for im in batch['images']]), axis=4)
-            self.sess.run(self.optimizer, {
+            res_train = self.sess.run([self.optimizer, self.loss, self.accuracy], {
                 self.image: batch['images'],
                 #self.image: images,
                 self.label: batch['ts'],
                 self.keep_prob: self.params['dropout']
             })
+            train_loss.append(res_train[1])
+            train_acc.append(res_train[2])
+
             if i % self.params['report_interval'] == 0:
                 # Calculate batch loss and accuracy
-                batch_loss, batch_acc = self.sess.run([self.loss, self.accuracy], feed_dict={
-                    self.image: batch['images'],
-                    #self.image: images,
-                    self.label: batch['ts'],
-                    self.keep_prob: 1.
-                })
-                valid_loss, valid_acc = self.sess.run([self.loss, self.accuracy], feed_dict={
-                    self.image: self.valid_batch_one['images'],
-                    #self.image: self.valid_images,
-                    self.label: self.valid_batch_one['ts'],
-                    self.keep_prob: 1.
-                })
-                print "%d\t%.4f\t\t%.4f\t\t%.4f\t\t%.4f\t\t%.4f\n" % (i, batch_loss, batch_acc, valid_loss, valid_acc, time.time() - time_last)
+                cur_acc, cur_loss, tot_num = 0, 0, 0
+                for batch_valid, num in self.valid_batch:
+                    valid_loss, valid_acc = self.sess.run(
+                        [self.loss, self.accuracy], feed_dict={
+                            self.image: batch_valid['images'],
+                            #self.image: self.valid_images,
+                            self.label: batch_valid['ts'],
+                            self.keep_prob: 1.
+                        })
+                    cur_loss += valid_loss * num
+                    cur_acc += valid_acc * num
+                    tot_num += num
+                valid_loss = cur_loss / float(tot_num)
+                valid_acc = (cur_acc / float(tot_num)) * 100
+                train_loss = sum(train_loss) / float(len(train_loss))
+                train_acc = sum(train_acc) / float(len(train_acc)) * 100
+                print "%d:\t  %.2f\t\t  %.1f\t\t  %.2f\t\t  %.1f \t\t %.2f" % (i, train_loss, train_acc, valid_loss, valid_acc, time.time() - time_last)
                 time_last = time.time()
+                train_loss = []
+                train_acc = []
+
             if valid_acc > 0.90 and valid_loss < self.min_loss:
                 self.min_loss = valid_loss
                 self.save_results(valid_loss, i)
