@@ -57,7 +57,7 @@ def run(params_range, samplings=5):
     data = etl.load_data(train_path=TRAIN_PATH,
                          test_path=TEST_PATH,
                          image_paths=IMAGE_PATHS,
-                         image_shape=(fixed_params['HEIGHT'], fixxed_params['WIDTH']))
+                         image_shape=(fixed_params['HEIGHT'], fixed_params['WIDTH']))
     batches = etl.batch_generator(data.train, data.test,
                                   batch_size=fixed_params['BATCH_SIZE'],
                                   num_classes=fixed_params['NUM_CLASSES'],
