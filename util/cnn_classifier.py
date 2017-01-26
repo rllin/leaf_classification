@@ -119,7 +119,8 @@ class CnnClassifier:
             'bd1': tf.Variable(tf.random_normal([self.params['d_out']]), name='bd1'),
             'out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='b_out')
         }
-        x = helpers.conv_net(self.image, self.size, self.weights, self.biases, self.keep_prob, self.net)
+        #x = helpers.conv_net(self.image, self.size, self.weights, self.biases, self.keep_prob, self.net)
+        x = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
         #return self.prediction_to_probability(x)
         #return tf.nn.softmax_cross_entropy_with_logits(x, self.label)
         return x

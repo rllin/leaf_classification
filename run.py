@@ -22,7 +22,7 @@ from util import etl, helpers, cnn_classifier
 
 TRAIN_PATH = "./data/train_images.csv"    # has new augmented images
 TEST_PATH = "./data/test.csv"
-IMAGE_PATHS = glob.glob("./data/standardized_images/*.jpg")
+IMAGE_PATHS = glob.glob("./data/standardized_images/128x128/*.jpg")
 
 VALIDATION_SIZE = 0.1
 SEED = 42
@@ -38,8 +38,9 @@ params_range = {
     'conv2_out': (2, randint(2, 8)),
     'd_out': (2, randint(4, 10)),
     'dropout': (0, uniform(0, 1.0)),
-    'HEIGHT': np.arange(128, 328, 4),    # muultiple of 4 because of two k=2
-    'WIDTH': np.arange(128, 328, 4),
+    'HEIGHT': 128,    # muultiple of 4 because of two k=2
+    #'WIDTH': np.arange(128, 328, 4),
+    'WIDTH': 128,
     'CHANNEL': 1,
     'BATCH_SIZE': 66,        # do 64 make sure not larger than VALIDATION_SIZE *
     'NUM_CLASSES': 99,
