@@ -67,7 +67,7 @@ def run(params_range, samplings=5):
                                   val_size=fixed_params['VALIDATION_SIZE'],
                                   class_size=fixed_params['CLASS_SIZE'])
     for param in params:
-        param['WIDTH'] = param['HEIGHT']
+        param.update(fixed_params)
         print 'running with the following parameters: \n %s' % json.dumps(param, indent=4)
         model = cnn_classifier.CnnClassifier(data.train, data.test, data.le, batches, param)
         model.train(param['ITERATIONS'])
