@@ -155,7 +155,7 @@ class CnnClassifier:
         train_loss, train_acc = [], []
         for i, batch in enumerate(self.batches.gen_train()):
             #images = np.expand_dims(np.array([imread(im) for im in batch['images']]), axis=4)
-            res_train = self.sess.run([self.optimizer, self.loss, self.accuracy], {
+            res_train = self.sess.run([self.optimize, self.loss, self.accuracy], {
                 self.image: batch['images'],
                 #self.image: images,
                 self.label: batch['ts'],
