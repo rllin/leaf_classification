@@ -23,7 +23,7 @@ from util import etl, helpers, cnn_classifier
 TRAIN_PATH = "./data/train_images.csv"    # has new augmented images
 #TRAIN_PATH = "./data/train.csv"    # has new augmented images
 TEST_PATH = "./data/test.csv"
-IMAGE_PATHS = glob.glob("./data/standardized_images/128x128/*.jpg")
+IMAGE_PATHS = glob.glob("./data/128x128/*.jpg")
 #IMAGE_PATHS = glob.glob("./data/images/*.jpg")
 
 
