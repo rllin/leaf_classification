@@ -157,7 +157,7 @@ class CnnClassifier:
                 self.label: batch['ts'],
                 self.keep_prob: self.params['dropout']
             })
-            if i % self.params['report_interval'] == 0:
+            if i % self.params['report_interval'] == 10:
                 # Calculate batch loss and accuracy
                 batch_loss, batch_acc = self.sess.run([self.loss, self.accuracy], feed_dict={
                     #self.image: batch['images'],

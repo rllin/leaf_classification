@@ -29,7 +29,7 @@ SEED = 42
 np.random.seed(SEED)
 TRAIN_SIZE = 1.0
 CLASS_SIZE = 1.0
-ITERATIONS = 1e1
+ITERATIONS = 1e2
 
 params_range = {
     'conv1_num': (0, randint(1, 10)),
