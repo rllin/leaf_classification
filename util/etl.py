@@ -278,12 +278,12 @@ class batch_generator():
         batch = self._batch_init(purpose='test')
         i = 0
         for idx in range(len(self._test['ids'])):
-            batch['margins'][i] = self._test['margins'][idx]
-            batch['shapes'][i] = self._test['shapes'][idx]
-            batch['textures'][i] = self._test['textures'][idx]
-            batch['images'][i] = self._test['images'][idx]
+            #batch['margins'][i] = self._test['margins'][idx]
+            #batch['shapes'][i] = self._test['shapes'][idx]
+            #batch['textures'][i] = self._test['textures'][idx]
+            #batch['images'][i] = self._test['images'][idx]
             batch['ids'].append(self._test['ids'][idx])
-            batch['features'][i] = np.concatenate((self._test['margins'][idx], self._test['shapes'][idx], self._test['textures'][idx]))
+            #batch['features'][i] = np.concatenate((self._test['margins'][idx], self._test['shapes'][idx], self._test['textures'][idx]))
             #batch['ids'].append(onehot(np.asarray([self._test['ids'][idx]], dtype='float32'), self._num_classes))
             i += 1
             if i >= self._batch_size:
