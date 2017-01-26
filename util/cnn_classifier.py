@@ -154,7 +154,6 @@ class CnnClassifier:
         time_last = time.time()
         for i, batch in enumerate(self.train_batch):
             #images = np.expand_dims(np.array([imread(im) for im in batch['images']]), axis=4)
-            print 'dropout: ', self.params['dropout']
             self.sess.run(self.optimizer, {
                 self.image: batch['images'],
                 #self.image: images,
