@@ -172,8 +172,10 @@ class CnnClassifier:
                     self.keep_prob: 1.
                 })
                 print "%d\t%.4f\t\t%.4f\t\t%.4f\t\t%.4f\t\t%.4f\n" % (i, batch_loss, batch_acc, valid_loss, valid_acc, time.time() - time_last)
-                self.save_results(valid_loss, i)
-                self.save_params(valid_loss, i)
+                if valid_acc > 0.90 and valid_loss < self.min_loss:
+                    self.min_loss = valid_loss
+                    self.save_results(valid_loss, i)
+                    self.save_params(valid_loss, i)
 
                 time_last = time.time()
             if i >= iterations:
@@ -209,46 +211,41 @@ class CnnClassifier:
         # haven't figured out how to reload in the context of
         # session variables being ownd also by this class
         model_folder = './tmp/models/'
-        if valid_loss < self.min_loss:
-            self.min_loss = valid_loss
-            current_ckpt = 'model_%f_%i_%s' % (valid_loss, iteration, datetime.now().isoformat())
-            os.makedirs('%s%s' % (model_folder, current_ckpt))
-            self.saver.save(self.sess, '%s%s/%s.ckpt' % (model_folder, current_ckpt, current_ckpt))
-            print 'saved checkpoint at %s%s' % (model_folder, current_ckpt)
-            if self.last_ckpt is not None:
-                for file in glob.glob('%s%s/*' % (model_folder, self.last_ckpt)):
-                    os.remove(file)
-                os.rmdir('%s%s/' % (model_folder, self.last_ckpt))
-                print 'deleted checkpoint at %s%s' % (model_folder, self.last_ckpt)
-            self.last_ckpt = current_ckpt
+        current_ckpt = 'model_%f_%i_%s' % (valid_loss, iteration, datetime.now().isoformat())
+        os.makedirs('%s%s' % (model_folder, current_ckpt))
+        self.saver.save(self.sess, '%s%s/%s.ckpt' % (model_folder, current_ckpt, current_ckpt))
+        print 'saved checkpoint at %s%s' % (model_folder, current_ckpt)
+        if self.last_ckpt is not None:
+            for file in glob.glob('%s%s/*' % (model_folder, self.last_ckpt)):
+                os.remove(file)
+            os.rmdir('%s%s/' % (model_folder, self.last_ckpt))
+            print 'deleted checkpoint at %s%s' % (model_folder, self.last_ckpt)
+        self.last_ckpt = current_ckpt
 
     def save_params(self, valid_loss, iteration):
-        if valid_loss < self.min_loss:
-            self.min_loss = valid_loss
-            current_params = './tmp/params/params_%f_%i_%s.json' % (valid_loss, iteration, datetime.now().isoformat())
-            with open(current_params, 'w') as f:
-                json.dump(self.params, f)
-                print 'saved params at %s' % current_params
-                if self.last_params is not None:
-                    os.remove(self.last_params)
-                    print 'deleted params at %s' % self.last_params
-                self.last_params = current_params
+        current_params = './tmp/params/params_%f_%i_%s.json' % (valid_loss, iteration, datetime.now().isoformat())
+        with open(current_params, 'w') as f:
+            json.dump(self.params, f)
+            print 'saved params at %s' % current_params
+            if self.last_params is not None:
+                os.remove(self.last_params)
+                print 'deleted params at %s' % self.last_params
+            self.last_params = current_params
 
     def save_results(self, valid_loss, iteration):
-        if valid_loss < self.min_loss:
-            self.min_loss = valid_loss
-            ids_test, preds_test = self.run_against_test()
+        ids_test, preds_test = self.run_against_test()
 
-            preds_df = pd.DataFrame(preds_test, columns=self.classes.classes_)
-            preds_df = preds_df.div(preds_df.sum(axis=1), axis=0)
-            ids_test_df = pd.DataFrame(ids_test, columns=["id"])
-            submission = pd.concat([ids_test_df, preds_df], axis=1)
-            current_results = './tmp/results/results_%f_%i_%s.csv' % (valid_loss, iteration, datetime.now().isoformat())
-            submission.to_csv(current_results, index=False)
-            if self.last_results is not None:
-                os.remove(self.last_results)
-                print 'deleted results at %s' % self.last_results
-            self.last_results = current_results
+        preds_df = pd.DataFrame(preds_test, columns=self.classes.classes_)
+        preds_df = preds_df.div(preds_df.sum(axis=1), axis=0)
+        ids_test_df = pd.DataFrame(ids_test, columns=["id"])
+        submission = pd.concat([ids_test_df, preds_df], axis=1)
+        current_results = './tmp/results/results_%f_%i_%s.csv' % (valid_loss, iteration, datetime.now().isoformat())
+        submission.to_csv(current_results, index=False)
+        print 'saved results at %s' % current_results
+        if self.last_results is not None:
+            os.remove(self.last_results)
+            print 'deleted results at %s' % self.last_results
+        self.last_results = current_results
 
 if __name__ == '__main__':
 # loading data and setting up constants
