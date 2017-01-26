@@ -239,7 +239,7 @@ class CnnClassifier:
             self.min_loss = valid_loss
             ids_test, preds_test = self.run_against_test()
 
-            preds_df = pd.DataFrame(preds_test, columns=self.classes.classes_[:10])
+            preds_df = pd.DataFrame(preds_test, columns=self.classes.classes_)
             preds_df = preds_df.div(preds_df.sum(axis=1), axis=0)
             ids_test_df = pd.DataFrame(ids_test, columns=["id"])
             submission = pd.concat([ids_test_df, preds_df], axis=1)
