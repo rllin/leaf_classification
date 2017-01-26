@@ -26,6 +26,9 @@ IMAGE_PATHS = glob.glob("./data/standardized_images/128x128/*.jpg")
 
 
 fixed_params = {
+    'HEIGHT': 128,    # muultiple of 4 because of two k=2
+    #'WIDTH': np.arange(128, 328, 4),
+    'WIDTH': 128,
     'BATCH_SIZE': 66, # do 64 make sure not larger than VALIDATION_SIZE *
     'NUM_CLASSES': 99,
     'ITERATIONS': 1e2,
@@ -44,9 +47,6 @@ params_range = {
     'conv2_out': (2, randint(2, 8)),
     'd_out': (2, randint(4, 10)),
     'dropout': (0, uniform(0, 1.0)),
-    'HEIGHT': 128,    # muultiple of 4 because of two k=2
-    #'WIDTH': np.arange(128, 328, 4),
-    'WIDTH': 128,
     'CHANNEL': 1,
     'LEARNING_RATE': (10, randint(-6, 1)),
     'report_interval': 10
@@ -54,7 +54,11 @@ params_range = {
 
 def run(params_range, samplings=5):
     params = helpers.random_search(params_range, samplings)
-    batches = etl.batch_generator(train, test,
+    data = etl.load_data(train_path=TRAIN_PATH,
+                         test_path=TEST_PATH,
+                         image_paths=IMAGE_PATHS,
+                         image_shape=(fixed_params['HEIGHT'], fixxed_params['WIDTH']))
+    batches = etl.batch_generator(data.train, data.test,
                                   batch_size=fixed_params['BATCH_SIZE'],
                                   num_classes=fixed_params['NUM_CLASSES'],
                                   num_iterations=fixed_params['ITERATIONS'],
@@ -65,10 +69,6 @@ def run(params_range, samplings=5):
     for param in params:
         param['WIDTH'] = param['HEIGHT']
         print 'running with the following parameters: \n %s' % json.dumps(param, indent=4)
-        data = etl.load_data(train_path=TRAIN_PATH,
-                             test_path=TEST_PATH,
-                             image_paths=IMAGE_PATHS,
-                             image_shape=(param['HEIGHT'], param['WIDTH']))
         model = cnn_classifier.CnnClassifier(data.train, data.test, data.le, batches, param)
         model.train(param['ITERATIONS'])
 
