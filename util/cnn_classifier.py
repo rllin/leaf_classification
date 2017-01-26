@@ -182,12 +182,12 @@ class CnnClassifier:
                 valid_acc = (cur_acc / float(tot_num)) * 100
                 train_loss = sum(train_loss) / float(len(train_loss))
                 train_acc = sum(train_acc) / float(len(train_acc)) * 100
-                print "%d:\t  %.2f\t\t  %.1f\t\t  %.2f\t\t  %.1f \t\t %.2f" % (i, train_loss, train_acc, valid_loss, valid_acc, time.time() - time_last)
+                print "%d:\t  %.2f\t\t  %.1f\t\t  %.2f\t\t  %.2f \t\t %.2f" % (i, train_loss, train_acc, valid_loss, valid_acc, time.time() - time_last)
                 time_last = time.time()
                 train_loss = []
                 train_acc = []
 
-            if valid_acc > 0.90 and valid_loss < self.min_loss:
+            if valid_acc > 90.0 and valid_loss < self.min_loss:
                 self.min_loss = valid_loss
                 self.save_results(valid_loss, i)
                 self.save_params(valid_loss, i)

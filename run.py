@@ -73,7 +73,7 @@ if __name__ == '__main__':
         'dropout': (0, uniform(0, 1.0)),
         'CHANNEL': 1,
         'LEARNING_RATE': (10, randint(-6, 1)),
-        'report_interval': 10
+        'report_interval': 100
     }
     run(params_range, fixed_params, 1)
 
