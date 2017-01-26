@@ -70,6 +70,7 @@ def run(params_range, samplings=5):
                                   class_size=fixed_params['CLASS_SIZE'])
     for param in params:
         param.update(fixed_params)
+        param['dropout'] = 0.1
         print 'running with the following parameters: \n %s' % json.dumps(param, indent=4)
         model = cnn_classifier.CnnClassifier(data.train, data.test, data.le, batches, param)
         model.train(param['ITERATIONS'])
