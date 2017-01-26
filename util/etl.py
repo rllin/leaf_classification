@@ -247,11 +247,12 @@ class batch_generator():
         #batch_holder['shapes'] = np.zeros((self._batch_size, self._num_features), dtype='float32')
         #batch_holder['textures'] = np.zeros((self._batch_size, self._num_features), dtype='float32')
         #batch_holder['images'] = np.zeros(tuple([self._batch_size] + self._image_shape), dtype='float32')
-        batch_holder['images'] = np.zeros(tuple([self._batch_size]), dtype='object')
         #batch_holder['features'] = np.zeros((self._batch_size, self._num_features * 3), dtype='float32')
         if (purpose == "train") or (purpose == "valid"):
+            batch_holder['images'] = np.zeros(tuple([self._batch_size]), dtype='object')
             batch_holder['ts'] = np.zeros((self._batch_size, self._num_classes), dtype='float32')
         else:
+            batch_holder['images'] = []
             batch_holder['ids'] = []
         return batch_holder
 
@@ -281,7 +282,7 @@ class batch_generator():
             #batch['margins'][i] = self._test['margins'][idx]
             #batch['shapes'][i] = self._test['shapes'][idx]
             #batch['textures'][i] = self._test['textures'][idx]
-            batch['images'][i] = self._test['images'][idx]
+            batch['images'].append(self._test['images'][idx])
             batch['ids'].append(self._test['ids'][idx])
             #batch['features'][i] = np.concatenate((self._test['margins'][idx], self._test['shapes'][idx], self._test['textures'][idx]))
             #batch['ids'].append(onehot(np.asarray([self._test['ids'][idx]], dtype='float32'), self._num_classes))
