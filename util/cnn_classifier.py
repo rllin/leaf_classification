@@ -151,8 +151,6 @@ class CnnClassifier:
         time_last = time.time()
         for i, batch in enumerate(self.train_batch):
             images = np.expand_dims(np.array([imread(im) for im in batch['images']]), axis=4)
-            print images.shape
-            print self.valid_images.shape
             self.sess.run(self.optimizer, {
                 #self.image: batch['images'],
                 self.image: images,
@@ -187,8 +185,9 @@ class CnnClassifier:
         preds_test = []
         ids_test = []
         for batch, num in self.batches.gen_test():
+            images = np.expand_dims(np.array([imread(im) for im in batch['images']]), axis=4)
             res_test = self.sess.run([self.probability], feed_dict={
-                self.image: batch['images'],
+                self.image: images,
                 self.keep_prob: 1
             })
             y_out = res_test[0]
@@ -198,7 +197,6 @@ class CnnClassifier:
             preds_test.append(y_out)
         ids_test = list(itertools.chain.from_iterable(ids_test))
         preds_test = np.concatenate(tuple(preds_test), axis=0)
-        print len(ids_test), len(preds_test)
         assert len(ids_test) == len(preds_test)
         return ids_test, preds_test
 
