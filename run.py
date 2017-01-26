@@ -41,7 +41,7 @@ params_range = {
     'HEIGHT': np.arange(128, 328, 4),    # muultiple of 4 because of two k=2
     'WIDTH': np.arange(128, 328, 4),
     'CHANNEL': 1,
-    'BATCH_SIZE': 64,        # do 64 make sure not larger than VALIDATION_SIZE *
+    'BATCH_SIZE': 66,        # do 64 make sure not larger than VALIDATION_SIZE *
     'NUM_CLASSES': 99,
     'SEED': SEED,
     'VALIDATION_SIZE': VALIDATION_SIZE,
