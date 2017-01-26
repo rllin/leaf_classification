@@ -180,8 +180,6 @@ class CnnClassifier:
                 time_last = time.time()
             if i >= iterations:
                 break
-            if valid_acc > 0.99:
-                break
 
     def run_against_test(self):
         preds_test = []
