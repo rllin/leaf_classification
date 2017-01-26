@@ -106,10 +106,10 @@ class load_data():
             #sample['texture'] = features[128:]
             if t_train is not None:
                 sample['t'] = np.asarray(t_train[i], dtype='int32')
-            #image = imread(row['image'], as_grey=True)
-            #image = helpers.scale_resize(image, (1706, 1706), image_shape)
-            #image = np.expand_dims(image, axis=2)
-            image = os.path.splitext(os.path.basename(row['image']))[0]
+            image = imread(row['image'], as_grey=True)
+            image = helpers.scale_resize(image, (1706, 1706), image_shape)
+            image = np.expand_dims(image, axis=2)
+            #image = os.path.splitext(os.path.basename(row['image']))[0]
             sample['image'] = image
             data[row['id']] = sample
             if i % 100 == 0 and self._verbose_flag:
@@ -120,10 +120,10 @@ class load_data():
         # making arrays with all data in, is nessesary when doing validation split
         data = dict()
         value = df.values()[0]
-        #img_tot_shp = tuple([len(df)] + list(value['image'].shape))
-        #data['images'] = np.zeros(img_tot_shp, dtype='float32')
+        img_tot_shp = tuple([len(df)] + list(value['image'].shape))
+        data['images'] = np.zeros(img_tot_shp, dtype='float32')
         feature_tot_shp = (len(df), 64)
-        data['images'] = np.zeros((len(df),), dtype='object')
+        #data['images'] = np.zeros((len(df),), dtype='object')
         #data['margins'] = np.zeros(feature_tot_shp, dtype='float32')
         #data['shapes'] = np.zeros(feature_tot_shp, dtype='float32')
         #data['textures'] = np.zeros(feature_tot_shp, dtype='float32')
@@ -133,7 +133,8 @@ class load_data():
             data['ids'] = np.zeros((len(df),), dtype='int32')
         for i, pair in enumerate(df.items()):
             key, value = pair
-            data['images'][i] = '%s/%s%s' % (os.path.dirname(self.image_paths[0]), value['image'], os.path.splitext(self.image_paths[0])[1])
+            #data['images'][i] = '%s/%s%s' % (os.path.dirname(self.image_paths[0]), value['image'], os.path.splitext(self.image_paths[0])[1])
+            data['images'][i] = value['image']
             #data['margins'][i] = value['margin']
             #data['shapes'][i] = value['shape']
             #data['textures'][i] = value['texture']

@@ -13,7 +13,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
-from skimage.io import imread
+#from skimage.io import imread
 
 from util import etl, helpers
 
@@ -85,7 +85,7 @@ class CnnClassifier:
         self.train_batch = self.batches.gen_train()
         self.valid_batch = self.batches.gen_valid()
         self.valid_batch_one, _ = self.valid_batch.next()
-        self.valid_images = np.expand_dims(np.array([imread(im) for im in self.valid_batch_one['images']]), axis=4)
+        #self.valid_images = np.expand_dims(np.array([imread(im) for im in self.valid_batch_one['images']]), axis=4)
 
         self.net = {}
         self.prediction
@@ -150,34 +150,34 @@ class CnnClassifier:
         print "Iter \t Batch Loss \t Batch Accuracy \t Valid Loss \t Valid Accuracy \t Time delta\n"
         time_last = time.time()
         for i, batch in enumerate(self.train_batch):
-            images = np.expand_dims(np.array([imread(im) for im in batch['images']]), axis=4)
+            #images = np.expand_dims(np.array([imread(im) for im in batch['images']]), axis=4)
             self.sess.run(self.optimizer, {
-                #self.image: batch['images'],
-                self.image: images,
+                self.image: batch['images'],
+                #self.image: images,
                 self.label: batch['ts'],
                 self.keep_prob: self.params['dropout']
             })
             if i % self.params['report_interval'] == 0:
                 # Calculate batch loss and accuracy
                 batch_loss, batch_acc = self.sess.run([self.loss, self.accuracy], feed_dict={
-                    #self.image: batch['images'],
-                    self.image: images,
+                    self.image: batch['images'],
+                    #self.image: images,
                     self.label: batch['ts'],
                     self.keep_prob: 1.
                 })
                 valid_loss, valid_acc = self.sess.run([self.loss, self.accuracy], feed_dict={
-                    #self.image: self.valid_batch_one['images'],
-                    self.image: self.valid_images,
+                    self.image: self.valid_batch_one['images'],
+                    #self.image: self.valid_images,
                     self.label: self.valid_batch_one['ts'],
                     self.keep_prob: 1.
                 })
                 print "%d\t%.4f\t\t%.4f\t\t%.4f\t\t%.4f\t\t%.4f\n" % (i, batch_loss, batch_acc, valid_loss, valid_acc, time.time() - time_last)
+                time_last = time.time()
             if valid_acc > 0.90 and valid_loss < self.min_loss:
                 self.min_loss = valid_loss
                 self.save_results(valid_loss, i)
                 self.save_params(valid_loss, i)
 
-            time_last = time.time()
             if i >= iterations:
                 break
 
@@ -185,13 +185,8 @@ class CnnClassifier:
         preds_test = []
         ids_test = []
         for batch, num in self.batches.gen_test():
-            try:
-                images = np.expand_dims(np.array([imread(im) for im in batch['images']]), axis=4)
-            except Exception as e:
-                print batch['images']
-                raise e
             res_test = self.sess.run([self.probability], feed_dict={
-                self.image: images,
+                self.image: batch['images'],
                 self.keep_prob: 1
             })
             y_out = res_test[0]

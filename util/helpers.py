@@ -57,8 +57,6 @@ def conv_net(x, size, weights, biases, dropout, net):
     return net['out']
 
 
-
-
 def pad_upto(image, (target_height, target_width)):
     h, w = image.shape
     up, left = (target_height - h) / 2, (target_width - w) / 2
