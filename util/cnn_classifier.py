@@ -13,6 +13,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
+from skimage.io import imread
+
 from util import etl, helpers
 
 def doublewrap(function):
@@ -59,10 +61,13 @@ class CnnClassifier:
 
         self.image = tf.placeholder(tf.float32, [
             self.params['BATCH_SIZE'],
-            self.params['WIDTH'],
-            self.params['HEIGHT'],
+            1706, 1706,
+            #self.params['WIDTH'],
+            #self.params['HEIGHT'],
             self.params['CHANNEL']],
             name='x_image_pl')
+        self.size = tf.constant([self.params['HEIGHT'], self.params['WIDTH']])
+        #self.image = tf.placeholder(tf.string, name='x_image_path_pl')
         self.label = tf.placeholder(tf.float32, [
             self.params['BATCH_SIZE'],
             int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))],
@@ -79,7 +84,8 @@ class CnnClassifier:
                                            class_size=self.params['CLASS_SIZE'])
         self.train_batch = self.batches.gen_train()
         self.valid_batch = self.batches.gen_valid()
-        self.valid_batch_one, i = self.valid_batch.next()
+        self.valid_batch_one, _ = self.valid_batch.next()
+        self.valid_images = np.expand_dims(np.array([imread(im) for im in self.valid_batch_one['images']]), axis=4)
 
         self.net = {}
         self.prediction
@@ -113,7 +119,7 @@ class CnnClassifier:
             'bd1': tf.Variable(tf.random_normal([self.params['d_out']]), name='bd1'),
             'out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='b_out')
         }
-        x = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
+        x = helpers.conv_net(self.image, self.size, self.weights, self.biases, self.keep_prob, self.net)
         #return self.prediction_to_probability(x)
         #return tf.nn.softmax_cross_entropy_with_logits(x, self.label)
         return x
@@ -144,20 +150,26 @@ class CnnClassifier:
         print "Iter \t Batch Loss \t Batch Accuracy \t Valid Loss \t Valid Accuracy \t Time delta\n"
         time_last = time.time()
         for i, batch in enumerate(self.train_batch):
+            images = np.expand_dims(np.array([imread(im) for im in batch['images']]), axis=4)
+            print images.shape
+            print self.valid_images.shape
             self.sess.run(self.optimizer, {
-                self.image: batch['images'],
+                #self.image: batch['images'],
+                self.image: images,
                 self.label: batch['ts'],
                 self.keep_prob: self.params['dropout']
             })
             if i % self.params['report_interval'] == 0:
                 # Calculate batch loss and accuracy
                 batch_loss, batch_acc = self.sess.run([self.loss, self.accuracy], feed_dict={
-                    self.image: batch['images'],
+                    #self.image: batch['images'],
+                    self.image: images,
                     self.label: batch['ts'],
                     self.keep_prob: 1.
                 })
                 valid_loss, valid_acc = self.sess.run([self.loss, self.accuracy], feed_dict={
-                    self.image: self.valid_batch_one['images'],
+                    #self.image: self.valid_batch_one['images'],
+                    self.image: self.valid_images,
                     self.label: self.valid_batch_one['ts'],
                     self.keep_prob: 1.
                 })

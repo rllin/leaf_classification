@@ -26,8 +26,10 @@ IMAGE_PATHS = glob.glob("./data/standardized_images/*.jpg")
 
 VALIDATION_SIZE = 0.1
 SEED = 42
+np.random.seed(SEED)
 TRAIN_SIZE = 1.0
-ITERATIONS = 1e2
+CLASS_SIZE = 1.0
+ITERATIONS = 1e1
 
 params_range = {
     'conv1_num': (0, randint(1, 10)),
@@ -39,12 +41,12 @@ params_range = {
     'HEIGHT': np.arange(128, 1708, 4),    # muultiple of 4 because of two k=2
     'WIDTH': np.arange(128, 1708, 4),
     'CHANNEL': 1,
-    'BATCH_SIZE': 64,
+    'BATCH_SIZE': 64,        # do 64 make sure not larger than VALIDATION_SIZE *
     'NUM_CLASSES': 99,
-    'VALIDATION_SIZE': VALIDATION_SIZE,
     'SEED': SEED,
+    'VALIDATION_SIZE': VALIDATION_SIZE,
     'TRAIN_SIZE': TRAIN_SIZE,
-    'CLASS_SIZE': 0.1,
+    'CLASS_SIZE': CLASS_SIZE,
     'ITERATIONS': ITERATIONS,
     'LEARNING_RATE': (10, randint(-6, 1)),
     'report_interval': 1
@@ -63,6 +65,6 @@ def run(params_range, samplings=5):
         model.train(param['ITERATIONS'])
 
 if __name__ == '__main__':
-    run(params_range, 5)
+    run(params_range, 2)
 
 

@@ -1,5 +1,6 @@
 import json
 
+import numpy as np
 from scipy.stats import randint, uniform
 from skimage.io import imread, imshow
 from skimage.transform import resize
@@ -20,9 +21,12 @@ def maxpool2d(x, k=2):
                           padding='SAME')
 
 
-def conv_net(x, weights, biases, dropout, net):
+def conv_net(x, size, weights, biases, dropout, net):
     # Reshape input picture
     # Convolution Layer
+    #
+    #x = tf.to_float(tf.image.decode_jpeg(tf.read_file(x), channels=1))
+    x = tf.image.resize_images(x, size)
     net['conv1'] = conv2d(x, weights['wc1'], biases['bc1'])
     # Max Pooling (down-sampling)
     net['pool1'] = maxpool2d(net['conv1'], k=2)
