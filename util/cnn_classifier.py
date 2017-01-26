@@ -84,8 +84,8 @@ class CnnClassifier:
                                            class_size=self.params['CLASS_SIZE'])
         '''
 
-        self.train_batch = self.batches.gen_train()
-        self.valid_batch = self.batches.gen_valid()
+        #self.train_batch = self.batches.gen_train()
+        #self.valid_batch = self.batches.gen_valid()
         #self.valid_batch_one, _ = self.valid_batch.next()
         #self.valid_images = np.expand_dims(np.array([imread(im) for im in self.valid_batch_one['images']]), axis=4)
 
@@ -153,7 +153,7 @@ class CnnClassifier:
         print "Iter \t Batch Loss \t Batch Accuracy \t Valid Loss \t Valid Accuracy \t Time delta\n"
         time_last = time.time()
         train_loss, train_acc = [], []
-        for i, batch in enumerate(self.train_batch):
+        for i, batch in enumerate(self.batches.gen_train()):
             #images = np.expand_dims(np.array([imread(im) for im in batch['images']]), axis=4)
             res_train = self.sess.run([self.optimizer, self.loss, self.accuracy], {
                 self.image: batch['images'],
@@ -167,7 +167,7 @@ class CnnClassifier:
             if i % self.params['report_interval'] == 0:
                 # Calculate batch loss and accuracy
                 cur_acc, cur_loss, tot_num = 0, 0, 0
-                for batch_valid, num in self.valid_batch:
+                for batch_valid, num in self.batches.gen_valid():
                     valid_loss, valid_acc = self.sess.run(
                         [self.loss, self.accuracy], feed_dict={
                             self.image: batch_valid['images'],
