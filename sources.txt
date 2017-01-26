@@ -1,3 +1,5 @@
 https://github.com/alrojo/tensorflow-tutorial/blob/master/lab4_Kaggle/lab4_Kaggle.ipynb
 https://github.com/aymericdamien/TensorFlow-Examples/blob/master/notebooks/3_NeuralNetworks/convolutional_network.ipynb
 https://gist.github.com/danijar/8663d3bbfd586bffecf6a0094cd116f2
+https://github.com/fluxcapacitor/pipeline/wiki/AWS-GPU-TensorFlow-Docker
+https://github.com/NVIDIA/nvidia-docker/issues/137

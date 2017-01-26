@@ -20,41 +20,8 @@ from scipy.stats import randint, uniform
 
 from util import etl, helpers, cnn_classifier
 
-TRAIN_PATH = "./data/train_images.csv"    # has new augmented images
-#TRAIN_PATH = "./data/train.csv"    # has new augmented images
-TEST_PATH = "./data/test.csv"
-IMAGE_PATHS = glob.glob("./data/128x128/*.jpg")
-#IMAGE_PATHS = glob.glob("./data/images/*.jpg")
 
-
-fixed_params = {
-    'HEIGHT': 128,    # muultiple of 4 because of two k=2
-    #'WIDTH': np.arange(128, 328, 4),
-    'WIDTH': 128,
-    'BATCH_SIZE': 66, # do 64 make sure not larger than VALIDATION_SIZE *
-    'NUM_CLASSES': 99,
-    'ITERATIONS': 1e2,
-    'SEED': 42,
-    'TRAIN_SIZE': 1.0,
-    'VALIDATION_SIZE': 0.1,
-    'CLASS_SIZE': 1.0,
-}
-
-np.random.seed(fixed_params['SEED'])
-
-params_range = {
-    'conv1_num': (0, randint(1, 10)),
-    'conv1_out': (2, randint(2, 8)),
-    'conv2_num': (0, randint(1, 10)),
-    'conv2_out': (2, randint(2, 8)),
-    'd_out': (2, randint(4, 10)),
-    'dropout': (0, uniform(0, 1.0)),
-    'CHANNEL': 1,
-    'LEARNING_RATE': (10, randint(-6, 1)),
-    'report_interval': 10
-}
-
-def run(params_range, samplings=5):
+def run(params_range, fixed_params, samplings=5):
     params = helpers.random_search(params_range, samplings)
     data = etl.load_data(train_path=TRAIN_PATH,
                          test_path=TEST_PATH,
@@ -75,6 +42,39 @@ def run(params_range, samplings=5):
         model.train(param['ITERATIONS'])
 
 if __name__ == '__main__':
-    run(params_range, 2)
+    TRAIN_PATH = "./data/train_images.csv"    # has new augmented images
+#TRAIN_PATH = "./data/train.csv"    # has new augmented images
+    TEST_PATH = "./data/test.csv"
+    IMAGE_PATHS = glob.glob("./data/128x128/*.jpg")
+#IMAGE_PATHS = glob.glob("./data/images/*.jpg")
+
+
+    fixed_params = {
+        'HEIGHT': 128,    # muultiple of 4 because of two k=2
+        #'WIDTH': np.arange(128, 328, 4),
+        'WIDTH': 128,
+        'BATCH_SIZE': 66, # do 64 make sure not larger than VALIDATION_SIZE *
+        'NUM_CLASSES': 99,
+        'ITERATIONS': 1e4,
+        'SEED': 42,
+        'TRAIN_SIZE': 1.0,
+        'VALIDATION_SIZE': 0.1,
+        'CLASS_SIZE': 1.0,
+    }
+
+    np.random.seed(fixed_params['SEED'])
+
+    params_range = {
+        'conv1_num': (0, randint(1, 10)),
+        'conv1_out': (2, randint(2, 8)),
+        'conv2_num': (0, randint(1, 10)),
+        'conv2_out': (2, randint(2, 8)),
+        'd_out': (2, randint(4, 10)),
+        'dropout': (0, uniform(0, 1.0)),
+        'CHANNEL': 1,
+        'LEARNING_RATE': (10, randint(-6, 1)),
+        'report_interval': 10
+    }
+    run(params_range, fixed_params, 1)
 
 
