@@ -49,7 +49,7 @@ params_range = {
     'CLASS_SIZE': CLASS_SIZE,
     'ITERATIONS': ITERATIONS,
     'LEARNING_RATE': (10, randint(-6, 1)),
-    'report_interval': 1
+    'report_interval': 10
 }
 
 def run(params_range, samplings=5):

@@ -157,7 +157,7 @@ class CnnClassifier:
                 self.label: batch['ts'],
                 self.keep_prob: self.params['dropout']
             })
-            if i % self.params['report_interval'] == 10:
+            if i % self.params['report_interval'] == 0:
                 # Calculate batch loss and accuracy
                 batch_loss, batch_acc = self.sess.run([self.loss, self.accuracy], feed_dict={
                     #self.image: batch['images'],
@@ -172,12 +172,12 @@ class CnnClassifier:
                     self.keep_prob: 1.
                 })
                 print "%d\t%.4f\t\t%.4f\t\t%.4f\t\t%.4f\t\t%.4f\n" % (i, batch_loss, batch_acc, valid_loss, valid_acc, time.time() - time_last)
-                if valid_acc > 0.90 and valid_loss < self.min_loss:
-                    self.min_loss = valid_loss
-                    self.save_results(valid_loss, i)
-                    self.save_params(valid_loss, i)
+            if valid_acc > 0.90 and valid_loss < self.min_loss:
+                self.min_loss = valid_loss
+                self.save_results(valid_loss, i)
+                self.save_params(valid_loss, i)
 
-                time_last = time.time()
+            time_last = time.time()
             if i >= iterations:
                 break
 
