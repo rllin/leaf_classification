@@ -185,7 +185,11 @@ class CnnClassifier:
         preds_test = []
         ids_test = []
         for batch, num in self.batches.gen_test():
-            images = np.expand_dims(np.array([imread(im) for im in batch['images']]), axis=4)
+            try:
+                images = np.expand_dims(np.array([imread(im) for im in batch['images']]), axis=4)
+            except Exception as e:
+                print images
+                raise e
             res_test = self.sess.run([self.probability], feed_dict={
                 self.image: images,
                 self.keep_prob: 1
