@@ -24,12 +24,18 @@ TRAIN_PATH = "./data/train_images.csv"    # has new augmented images
 TEST_PATH = "./data/test.csv"
 IMAGE_PATHS = glob.glob("./data/standardized_images/128x128/*.jpg")
 
-VALIDATION_SIZE = 0.1
-SEED = 42
-np.random.seed(SEED)
-TRAIN_SIZE = 1.0
-CLASS_SIZE = 1.0
-ITERATIONS = 1e2
+
+fixed_params = {
+    'BATCH_SIZE': 66, # do 64 make sure not larger than VALIDATION_SIZE *
+    'NUM_CLASSES': 99,
+    'ITERATIONS': 1e2,
+    'SEED': 42,
+    'TRAIN_SIZE': 1.0,
+    'VALIDATION_SIZE': 0.1,
+    'CLASS_SIZE': 1.0,
+}
+
+np.random.seed(fixed_params['SEED'])
 
 params_range = {
     'conv1_num': (0, randint(1, 10)),
@@ -42,19 +48,20 @@ params_range = {
     #'WIDTH': np.arange(128, 328, 4),
     'WIDTH': 128,
     'CHANNEL': 1,
-    'BATCH_SIZE': 66,        # do 64 make sure not larger than VALIDATION_SIZE *
-    'NUM_CLASSES': 99,
-    'SEED': SEED,
-    'VALIDATION_SIZE': VALIDATION_SIZE,
-    'TRAIN_SIZE': TRAIN_SIZE,
-    'CLASS_SIZE': CLASS_SIZE,
-    'ITERATIONS': ITERATIONS,
     'LEARNING_RATE': (10, randint(-6, 1)),
     'report_interval': 10
 }
 
 def run(params_range, samplings=5):
     params = helpers.random_search(params_range, samplings)
+    batches = etl.batch_generator(train, test,
+                                  batch_size=fixed_params['BATCH_SIZE'],
+                                  num_classes=fixed_params['NUM_CLASSES'],
+                                  num_iterations=fixed_params['ITERATIONS'],
+                                  seed=fixed_params['SEED'],
+                                  train_size=fixed_params['TRAIN_SIZE'],
+                                  val_size=fixed_params['VALIDATION_SIZE'],
+                                  class_size=fixed_params['CLASS_SIZE'])
     for param in params:
         param['WIDTH'] = param['HEIGHT']
         print 'running with the following parameters: \n %s' % json.dumps(param, indent=4)
@@ -62,7 +69,7 @@ def run(params_range, samplings=5):
                              test_path=TEST_PATH,
                              image_paths=IMAGE_PATHS,
                              image_shape=(param['HEIGHT'], param['WIDTH']))
-        model = cnn_classifier.CnnClassifier(data.train, data.test, data.le, param)
+        model = cnn_classifier.CnnClassifier(data.train, data.test, data.le, batches, param)
         model.train(param['ITERATIONS'])
 
 if __name__ == '__main__':

@@ -55,15 +55,14 @@ def define_scope(function, scope=None, *args, **kwargs):
 
 
 class CnnClassifier:
-    def __init__(self, train, test, classes, params):
+    def __init__(self, train, test, classes, batches, params):
         self.classes = classes
         self.params = params
 
         self.image = tf.placeholder(tf.float32, [
             self.params['BATCH_SIZE'],
-            1706, 1706,
-            #self.params['WIDTH'],
-            #self.params['HEIGHT'],
+            self.params['WIDTH'],
+            self.params['HEIGHT'],
             self.params['CHANNEL']],
             name='x_image_pl')
         self.size = tf.constant([self.params['HEIGHT'], self.params['WIDTH']])
@@ -73,7 +72,8 @@ class CnnClassifier:
             int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))],
             name='classes_pl')
         self.keep_prob = tf.placeholder(tf.float32, name='keep_prob_pl') #dropout (keep probability)
-
+        self.batches = batches
+        '''
         self.batches = etl.batch_generator(train, test,
                                            batch_size=self.params['BATCH_SIZE'],
                                            num_classes=self.params['NUM_CLASSES'],
@@ -82,6 +82,8 @@ class CnnClassifier:
                                            train_size=self.params['TRAIN_SIZE'],
                                            val_size=self.params['VALIDATION_SIZE'],
                                            class_size=self.params['CLASS_SIZE'])
+        '''
+
         self.train_batch = self.batches.gen_train()
         self.valid_batch = self.batches.gen_valid()
         self.valid_batch_one, _ = self.valid_batch.next()
