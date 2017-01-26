@@ -281,7 +281,7 @@ class batch_generator():
             #batch['margins'][i] = self._test['margins'][idx]
             #batch['shapes'][i] = self._test['shapes'][idx]
             #batch['textures'][i] = self._test['textures'][idx]
-            #batch['images'][i] = self._test['images'][idx]
+            batch['images'][i] = self._test['images'][idx]
             batch['ids'].append(self._test['ids'][idx])
             #batch['features'][i] = np.concatenate((self._test['margins'][idx], self._test['shapes'][idx], self._test['textures'][idx]))
             #batch['ids'].append(onehot(np.asarray([self._test['ids'][idx]], dtype='float32'), self._num_classes))
@@ -307,7 +307,7 @@ class batch_generator():
                 #batch['shapes'][i] = self._train['shapes'][idx]
                 #batch['textures'][i] = self._train['textures'][idx]
                 batch['images'][i] = self._train['images'][idx]
-                #batch['ts'][i] = onehot(np.asarray([self._train['ts'][idx]], dtype='float32'), self._num_classes)
+                batch['ts'][i] = onehot(np.asarray([self._train['ts'][idx]], dtype='float32'), self._num_classes)
                 #batch['features'][i] = np.concatenate((self._train['margins'][idx], self._train['shapes'][idx], self._train['textures'][idx]))
                 i += 1
                 if i >= self._batch_size:
