@@ -38,8 +38,8 @@ params_range = {
     'conv2_out': (2, randint(2, 8)),
     'd_out': (2, randint(4, 10)),
     'dropout': (0, uniform(0, 1.0)),
-    'HEIGHT': np.arange(128, 1708, 4),    # muultiple of 4 because of two k=2
-    'WIDTH': np.arange(128, 1708, 4),
+    'HEIGHT': np.arange(128, 328, 4),    # muultiple of 4 because of two k=2
+    'WIDTH': np.arange(128, 328, 4),
     'CHANNEL': 1,
     'BATCH_SIZE': 64,        # do 64 make sure not larger than VALIDATION_SIZE *
     'NUM_CLASSES': 99,
