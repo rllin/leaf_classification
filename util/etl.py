@@ -107,7 +107,7 @@ class load_data():
             if t_train is not None:
                 sample['t'] = np.asarray(t_train[i], dtype='int32')
             image = imread(row['image'], as_grey=True)
-            image = helpers.scale_resize(image, (1706, 1706), image_shape)
+            #image = helpers.scale_resize(image, (1706, 1706), image_shape)
             image = np.expand_dims(image, axis=2)
             #image = os.path.splitext(os.path.basename(row['image']))[0]
             sample['image'] = image
@@ -184,7 +184,7 @@ class batch_generator():
 
         # get image size
         value = self._train['images'][0]
-        #self._image_shape = list(value.shape)
+        self._image_shape = list(value.shape)
         self._batch_size = batch_size
         self._num_classes = num_classes
         self._num_iterations = num_iterations
@@ -250,7 +250,7 @@ class batch_generator():
         #batch_holder['images'] = np.zeros(tuple([self._batch_size] + self._image_shape), dtype='float32')
         #batch_holder['features'] = np.zeros((self._batch_size, self._num_features * 3), dtype='float32')
         if (purpose == "train") or (purpose == "valid"):
-            batch_holder['images'] = np.zeros(tuple([self._batch_size]), dtype='object')
+            batch_holder['images'] = np.zeros(tuple([self._batch_size] + self._image_shape), dtype='object')
             batch_holder['ts'] = np.zeros((self._batch_size, self._num_classes), dtype='float32')
         else:
             batch_holder['images'] = []

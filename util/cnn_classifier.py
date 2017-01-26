@@ -65,7 +65,7 @@ class CnnClassifier:
             self.params['HEIGHT'],
             self.params['CHANNEL']],
             name='x_image_pl')
-        self.size = tf.constant([self.params['HEIGHT'], self.params['WIDTH']])
+        #self.size = tf.constant([self.params['HEIGHT'], self.params['WIDTH']])
         #self.image = tf.placeholder(tf.string, name='x_image_path_pl')
         self.label = tf.placeholder(tf.float32, [
             self.params['BATCH_SIZE'],
