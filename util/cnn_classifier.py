@@ -188,7 +188,7 @@ class CnnClassifier:
             try:
                 images = np.expand_dims(np.array([imread(im) for im in batch['images']]), axis=4)
             except Exception as e:
-                print images
+                print batch['images']
                 raise e
             res_test = self.sess.run([self.probability], feed_dict={
                 self.image: images,
