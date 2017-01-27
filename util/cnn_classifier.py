@@ -158,7 +158,7 @@ class CnnClassifier:
                 train_loss = []
                 train_acc = []
 
-                if (valid_acc > 2.0 and valid_loss < self.min_loss) or (saved_before == False and i == iterations):
+                if (valid_acc > 99.0 and valid_loss < self.min_loss) or (saved_before == False and i == iterations):
                     saved_before = True
                     self.min_loss = valid_loss
                     self.save_results(valid_loss, i)
