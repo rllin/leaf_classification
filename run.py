@@ -43,23 +43,23 @@ def run(params_range, fixed_params, samplings=5):
 
 if __name__ == '__main__':
     TRAIN_PATH = "./data/train_images.csv"    # has new augmented images
-#TRAIN_PATH = "./data/train.csv"    # has new augmented images
+    TRAIN_PATH = "./data/train.csv"    # has new augmented images
     TEST_PATH = "./data/test.csv"
     IMAGE_PATHS = glob.glob("./data/128x128/*.jpg")
-#IMAGE_PATHS = glob.glob("./data/images/*.jpg")
+    IMAGE_PATHS = [e for e in IMAGE_PATHS if int(os.path.basename(os.path.splitext(e)[0])) <= 1584]
 
 
     fixed_params = {
         'HEIGHT': 128,    # muultiple of 4 because of two k=2
         #'WIDTH': np.arange(128, 328, 4),
         'WIDTH': 128,
-        'BATCH_SIZE': 66, # do 64 make sure not larger than VALIDATION_SIZE *
+        'BATCH_SIZE': 66*2, # do 64 make sure not larger than VALIDATION_SIZE *
         'NUM_CLASSES': 99,
         'ITERATIONS': 1e4,
         'SEED': 42,
         'TRAIN_SIZE': 1.0,
-        'VALIDATION_SIZE': 0.1,
-        'CLASS_SIZE': 1.0,
+        'VALIDATION_SIZE': 0.2,
+        'CLASS_SIZE': 0.1,
     }
 
     np.random.seed(fixed_params['SEED'])
@@ -73,7 +73,7 @@ if __name__ == '__main__':
         'dropout': (0, uniform(0, 1.0)),
         'CHANNEL': 1,
         'LEARNING_RATE': (10, randint(-6, 1)),
-        'report_interval': 100
+        'report_interval': 1
     }
     run(params_range, fixed_params, 1)
 

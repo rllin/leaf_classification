@@ -65,45 +65,12 @@ class CnnClassifier:
             self.params['HEIGHT'],
             self.params['CHANNEL']],
             name='x_image_pl')
-        #self.size = tf.constant([self.params['HEIGHT'], self.params['WIDTH']])
-        #self.image = tf.placeholder(tf.string, name='x_image_path_pl')
         self.label = tf.placeholder(tf.float32, [
             self.params['BATCH_SIZE'],
             int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))],
             name='classes_pl')
         self.keep_prob = tf.placeholder(tf.float32, name='keep_prob_pl') #dropout (keep probability)
-        self.batches = batches
-        '''
-        self.batches = etl.batch_generator(train, test,
-                                           batch_size=self.params['BATCH_SIZE'],
-                                           num_classes=self.params['NUM_CLASSES'],
-                                           num_iterations=self.params['ITERATIONS'],
-                                           seed=self.params['SEED'],
-                                           train_size=self.params['TRAIN_SIZE'],
-                                           val_size=self.params['VALIDATION_SIZE'],
-                                           class_size=self.params['CLASS_SIZE'])
-        '''
 
-        #self.train_batch = self.batches.gen_train()
-        #self.valid_batch = self.batches.gen_valid()
-        #self.valid_batch_one, _ = self.valid_batch.next()
-        #self.valid_images = np.expand_dims(np.array([imread(im) for im in self.valid_batch_one['images']]), axis=4)
-
-        self.net = {}
-        self.prediction
-        self.probability
-        self.optimize
-        self.error
-        self.loss
-        self.min_loss = 1e99
-        self.saver = tf.train.Saver()
-        self.last_ckpt, self.last_params, self.last_results = None, None, None
-
-        self.sess = tf.Session()
-        self.sess.run(tf.global_variables_initializer())
-
-    @define_scope(initializer=tf.global_variables_initializer())
-    def prediction(self):
         # Construct model
         self.weights = {
             # 5x5 conv, 1 input, 32 outputs
@@ -121,41 +88,54 @@ class CnnClassifier:
             'bd1': tf.Variable(tf.random_normal([self.params['d_out']]), name='bd1'),
             'out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='b_out')
         }
-        #x = helpers.conv_net(self.image, self.size, self.weights, self.biases, self.keep_prob, self.net)
-        x = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
-        #return self.prediction_to_probability(x)
-        #return tf.nn.softmax_cross_entropy_with_logits(x, self.label)
-        return x
 
-    @define_scope
-    def probability(self):
-        return tf.nn.softmax(self.prediction)
+        self.batches = batches
 
-    @define_scope
-    def optimize(self):
-        #self.loss = -tf.reduce_mean(tf.reduce_sum(self.label * tf.log(tf.clip_by_value(self.prediction, 1e-15, 1-1e-15)), reduction_indices=[1]))
-        self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(self.prediction, self.label))
-        self.optimizer = tf.train.AdamOptimizer(learning_rate=self.params['LEARNING_RATE']).minimize(self.loss)
-        return self.optimizer
+        self.net = {}
+        self.min_loss = 1e99
+        self.last_ckpt, self.last_params, self.last_results = None, None, None
 
-    @define_scope
-    def accuracy(self):
-        correct_pred = tf.equal(tf.argmax(self.prediction, 1), tf.argmax(self.label, 1))
-        return tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+        self.sess = tf.Session()
+        self.sess.run(tf.global_variables_initializer())
+        tf.contrib.layers.summarize_variables()
 
-    @define_scope
-    def error(self):
+    def setup(self):
+
+        prediction = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
+
+        probability = tf.nn.softmax(prediction)
+
+        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label))
+        optimizer = tf.train.AdamOptimizer(learning_rate=self.params['LEARNING_RATE']).minimize(loss)
+
+        correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(self.label, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+
         mistakes = tf.not_equal(
-            tf.argmax(self.label, 1), tf.argmax(self.prediction, 1))
-        return tf.reduce_mean(tf.cast(mistakes, tf.float32))
+            tf.argmax(self.label, 1), tf.argmax(prediction, 1))
+        error = tf.reduce_mean(tf.cast(mistakes, tf.float32))
+
+        summaries = tf.summary.merge_all()
+
+        return prediction, probability, loss, optimizer, correct_pred, accuracy, mistakes, error, summaries
 
     def train(self, iterations):
+        print 'setting up'
+        prediction, probability, loss, optimizer, correct_pred, accuracy, mistakes, error, summaries = self.setup()
+        self.sess.run(tf.global_variables_initializer())
+
+        self.saver = tf.train.Saver()
+
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        summaries_path = "tensorboard/%s/logs" % (timestamp)
+        summarywriter = tf.train.SummaryWriter(summaries_path, self.sess.graph)
+
         print "Iter \t Batch Loss \t Batch Accuracy \t Valid Loss \t Valid Accuracy \t Time delta\n"
         time_last = time.time()
         train_loss, train_acc = [], []
         for i, batch in enumerate(self.batches.gen_train()):
             #images = np.expand_dims(np.array([imread(im) for im in batch['images']]), axis=4)
-            res_train = self.sess.run([self.optimize, self.loss, self.accuracy], {
+            res_train = self.sess.run([optimizer, loss, accuracy, summaries], {
                 self.image: batch['images'],
                 #self.image: images,
                 self.label: batch['ts'],
@@ -163,13 +143,14 @@ class CnnClassifier:
             })
             train_loss.append(res_train[1])
             train_acc.append(res_train[2])
+            summarywriter.add_summary(res_train[3], i)
 
             if i % self.params['report_interval'] == 0:
                 # Calculate batch loss and accuracy
                 cur_acc, cur_loss, tot_num = 0, 0, 0
                 for batch_valid, num in self.batches.gen_valid():
-                    valid_loss, valid_acc = self.sess.run(
-                        [self.loss, self.accuracy], feed_dict={
+                    valid_loss, valid_acc, summary = self.sess.run(
+                        [loss, accuracy, summaries], feed_dict={
                             self.image: batch_valid['images'],
                             #self.image: self.valid_images,
                             self.label: batch_valid['ts'],
@@ -183,6 +164,7 @@ class CnnClassifier:
                 train_loss = sum(train_loss) / float(len(train_loss))
                 train_acc = sum(train_acc) / float(len(train_acc)) * 100
                 print "%d:\t  %.2f\t\t  %.1f\t\t  %.2f\t\t  %.2f \t\t %.2f" % (i, train_loss, train_acc, valid_loss, valid_acc, time.time() - time_last)
+                summarywriter.add_summary(summary, i)
                 time_last = time.time()
                 train_loss = []
                 train_acc = []
