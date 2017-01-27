@@ -168,7 +168,7 @@ class CnnClassifier:
             if i >= iterations:
                 break
 
-    def run_against_valid(self, loss, accuracy, summary):
+    def run_against_valid(self, loss, accuracy, summaries):
         cur_acc, cur_loss, tot_num = 0, 0, 0
         for batch_valid, num in self.batches.gen_valid():
             valid_loss, valid_acc, summary = self.sess.run(
