@@ -148,7 +148,7 @@ class CnnClassifier:
             #summarywriter.add_summary(res_train[3], i)
 
             if i % self.params['report_interval'] == 0:
-                valid_loss, valid_acc, summary = self.run_against_valid(loss, accuracy, summary)
+                valid_loss, valid_acc, summary = self.run_against_valid(loss, accuracy, summaries)
                 train_loss = sum(train_loss) / float(len(train_loss))
                 train_acc = sum(train_acc) / float(len(train_acc)) * 100
                 # Calculate batch loss and accuracy
