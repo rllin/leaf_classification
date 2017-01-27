@@ -109,23 +109,24 @@ class CnnClassifier:
         self.run_against_test()
 
     def setup(self):
-        self.prediction = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
-        self.probability = tf.nn.softmax(self.prediction)
-        self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(self.prediction, self.label))
-        self.optimizer = tf.train.AdamOptimizer(learning_rate=self.params['LEARNING_RATE']).minimize(self.loss)
-        correct_pred = tf.equal(tf.argmax(self.prediction, 1), tf.argmax(self.label, 1))
-        self.accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+        prediction = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
+        probability = tf.nn.softmax(prediction)
+        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label))
+        optimizer = tf.train.AdamOptimizer(learning_rate=self.params['LEARNING_RATE']).minimize(loss)
+        correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(self.label, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
         mistakes = tf.not_equal(
-            tf.argmax(self.label, 1), tf.argmax(self.prediction, 1))
-        self.error = tf.reduce_mean(tf.cast(mistakes, tf.float32))
-        self.summaries = tf.summary.merge_all()
+            tf.argmax(self.label, 1), tf.argmax(prediction, 1))
+        error = tf.reduce_mean(tf.cast(mistakes, tf.float32))
+        summaries = tf.summary.merge_all()
         self.sess.run(tf.global_variables_initializer())
+        return prediction, probability, loss, optimizer, accuracy, error, summaries
 
 
     def train(self, iterations):
         print 'setting up'
         saved_before = False
-        self.setup()
+        prediction, probability, loss, optimizer, accuracy, error, summaries = self.setup()
 
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         summaries_path = "tensorboard/%s/logs" % (timestamp)
@@ -136,7 +137,7 @@ class CnnClassifier:
         train_loss, train_acc = [], []
         for i, batch in enumerate(self.batches.gen_train()):
             #images = np.expand_dims(np.array([imread(im) for im in batch['images']]), axis=4)
-            res_train = self.sess.run([self.optimizer, self.loss, self.accuracy, self.summaries], {
+            res_train = self.sess.run([optimizer, loss, accuracy, summaries], {
                 self.image: batch['images'],
                 #self.image: images,
                 self.label: batch['ts'],
@@ -147,7 +148,7 @@ class CnnClassifier:
             #summarywriter.add_summary(res_train[3], i)
 
             if i % self.params['report_interval'] == 0:
-                valid_loss, valid_acc, summary = self.run_against_valid()
+                valid_loss, valid_acc, summary = self.run_against_valid(loss, accuracy, summary)
                 train_loss = sum(train_loss) / float(len(train_loss))
                 train_acc = sum(train_acc) / float(len(train_acc)) * 100
                 # Calculate batch loss and accuracy
@@ -160,18 +161,18 @@ class CnnClassifier:
                 if (valid_acc > 99.0 and valid_loss < self.min_loss) or (saved_before == False and i == iterations):
                     saved_before = True
                     self.min_loss = valid_loss
-                    self.save_results(valid_loss, i)
+                    self.save_results(valid_loss, i, probability)
                     self.save_params(valid_loss, i)
                     self.save_checkpoint(valid_loss, i)
 
             if i >= iterations:
                 break
 
-    def run_against_valid(self):
+    def run_against_valid(self, loss, accuracy, summary):
         cur_acc, cur_loss, tot_num = 0, 0, 0
         for batch_valid, num in self.batches.gen_valid():
             valid_loss, valid_acc, summary = self.sess.run(
-                [self.loss, self.accuracy, self.summaries], feed_dict={
+                [loss, accuracy, summaries], feed_dict={
                     self.image: batch_valid['images'],
                     #self.image: self.valid_images,
                     self.label: batch_valid['ts'],
@@ -184,11 +185,11 @@ class CnnClassifier:
         valid_acc = (cur_acc / float(tot_num)) * 100
         return valid_loss, valid_acc, summary
 
-    def run_against_test(self):
+    def run_against_test(self, probability):
         preds_test = []
         ids_test = []
         for batch, num in self.batches.gen_test():
-            res_test = self.sess.run([self.probability], feed_dict={
+            res_test = self.sess.run([probability], feed_dict={
                 self.image: batch['images'],
                 self.keep_prob: 1
             })
@@ -228,8 +229,8 @@ class CnnClassifier:
                 print 'deleted params at %s' % self.last_params
             self.last_params = current_params
 
-    def save_results(self, valid_loss, iteration):
-        ids_test, preds_test = self.run_against_test()
+    def save_results(self, valid_loss, iteration, probability):
+        ids_test, preds_test = self.run_against_test(probability)
 
         preds_df = pd.DataFrame(preds_test, columns=self.classes.classes_)
         preds_df = preds_df.div(preds_df.sum(axis=1), axis=0)
