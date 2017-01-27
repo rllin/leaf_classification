@@ -119,14 +119,13 @@ class CnnClassifier:
             tf.argmax(self.label, 1), tf.argmax(self.prediction, 1))
         self.error = tf.reduce_mean(tf.cast(mistakes, tf.float32))
         self.summaries = tf.summary.merge_all()
+        self.sess.run(tf.global_variables_initializer())
 
 
     def train(self, iterations):
         print 'setting up'
         saved_before = False
         self.setup()
-        self.sess.run(tf.global_variables_initializer())
-
 
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         summaries_path = "tensorboard/%s/logs" % (timestamp)
@@ -145,7 +144,7 @@ class CnnClassifier:
             })
             train_loss.append(res_train[1])
             train_acc.append(res_train[2])
-            summarywriter.add_summary(res_train[3], i)
+            #summarywriter.add_summary(res_train[3], i)
 
             if i % self.params['report_interval'] == 0:
                 valid_loss, valid_acc, summary = self.run_against_valid()
@@ -153,7 +152,7 @@ class CnnClassifier:
                 train_acc = sum(train_acc) / float(len(train_acc)) * 100
                 # Calculate batch loss and accuracy
                 print "%d:\t  %.2f\t\t  %.1f\t\t  %.2f\t\t  %.2f \t\t %.2f" % (i, train_loss, train_acc, valid_loss, valid_acc, time.time() - time_last)
-                summarywriter.add_summary(summary, i)
+                #summarywriter.add_summary(summary, i)
                 time_last = time.time()
                 train_loss = []
                 train_acc = []
