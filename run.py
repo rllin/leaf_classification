@@ -66,10 +66,10 @@ if __name__ == '__main__':
 
     params_range = {
         'conv1_num': (0, randint(5, 7)),
-        'conv1_out': (2, randint(4, 8)),
+        'conv1_out': (2, randint(2, 3)),
         'conv2_num': (0, randint(5, 7)),
-        'conv2_out': (2, randint(4, 8)),
-        'd_out': (2, randint(8, 11)),
+        'conv2_out': (2, randint(2, 3)),
+        'd_out': (2, randint(4, 5)),
         'dropout': (0, uniform(0, 1.0)),
         'CHANNEL': 1,
         'LEARNING_RATE': (10, randint(-4, -1)),
