@@ -96,35 +96,36 @@ class CnnClassifier:
         self.last_ckpt, self.last_params, self.last_results = None, None, None
 
         self.sess = tf.Session()
+        self.saver = tf.train.Saver()
         self.sess.run(tf.global_variables_initializer())
         tf.contrib.layers.summarize_variables()
 
+    def restore(self, ckpt_file):
+        self.saver.restore(self.sess, ckpt_file)
+
+    def run_restore(self, ckpt_file):
+        self.restore(ckpt_file)
+        self.setup()
+        self.run_against_test()
+
     def setup(self):
-
-        prediction = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
-
-        probability = tf.nn.softmax(prediction)
-
-        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label))
-        optimizer = tf.train.AdamOptimizer(learning_rate=self.params['LEARNING_RATE']).minimize(loss)
-
-        correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(self.label, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
-
+        self.prediction = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
+        self.probability = tf.nn.softmax(self.prediction)
+        self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(self.prediction, self.label))
+        self.optimizer = tf.train.AdamOptimizer(learning_rate=self.params['LEARNING_RATE']).minimize(self.loss)
+        correct_pred = tf.equal(tf.argmax(self.prediction, 1), tf.argmax(self.label, 1))
+        self.accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
         mistakes = tf.not_equal(
-            tf.argmax(self.label, 1), tf.argmax(prediction, 1))
-        error = tf.reduce_mean(tf.cast(mistakes, tf.float32))
+            tf.argmax(self.label, 1), tf.argmax(self.prediction, 1))
+        self.error = tf.reduce_mean(tf.cast(mistakes, tf.float32))
+        self.summaries = tf.summary.merge_all()
 
-        summaries = tf.summary.merge_all()
-
-        return prediction, probability, loss, optimizer, correct_pred, accuracy, mistakes, error, summaries
 
     def train(self, iterations):
         print 'setting up'
-        prediction, probability, loss, optimizer, correct_pred, accuracy, mistakes, error, summaries = self.setup()
+        self.setup()
         self.sess.run(tf.global_variables_initializer())
 
-        self.saver = tf.train.Saver()
 
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         summaries_path = "tensorboard/%s/logs" % (timestamp)
@@ -135,7 +136,7 @@ class CnnClassifier:
         train_loss, train_acc = [], []
         for i, batch in enumerate(self.batches.gen_train()):
             #images = np.expand_dims(np.array([imread(im) for im in batch['images']]), axis=4)
-            res_train = self.sess.run([optimizer, loss, accuracy, summaries], {
+            res_train = self.sess.run([self.optimizer, self.loss, self.accuracy, self.summaries], {
                 self.image: batch['images'],
                 #self.image: images,
                 self.label: batch['ts'],
@@ -146,36 +147,41 @@ class CnnClassifier:
             summarywriter.add_summary(res_train[3], i)
 
             if i % self.params['report_interval'] == 0:
-                # Calculate batch loss and accuracy
-                cur_acc, cur_loss, tot_num = 0, 0, 0
-                for batch_valid, num in self.batches.gen_valid():
-                    valid_loss, valid_acc, summary = self.sess.run(
-                        [loss, accuracy, summaries], feed_dict={
-                            self.image: batch_valid['images'],
-                            #self.image: self.valid_images,
-                            self.label: batch_valid['ts'],
-                            self.keep_prob: 1.
-                        })
-                    cur_loss += valid_loss * num
-                    cur_acc += valid_acc * num
-                    tot_num += num
-                valid_loss = cur_loss / float(tot_num)
-                valid_acc = (cur_acc / float(tot_num)) * 100
+                valid_loss, valid_acc, summary = self.run_against_valid()
                 train_loss = sum(train_loss) / float(len(train_loss))
                 train_acc = sum(train_acc) / float(len(train_acc)) * 100
+                # Calculate batch loss and accuracy
                 print "%d:\t  %.2f\t\t  %.1f\t\t  %.2f\t\t  %.2f \t\t %.2f" % (i, train_loss, train_acc, valid_loss, valid_acc, time.time() - time_last)
                 summarywriter.add_summary(summary, i)
                 time_last = time.time()
                 train_loss = []
                 train_acc = []
 
-            if valid_acc > 90.0 and valid_loss < self.min_loss:
+            if valid_acc > 1.0 and valid_loss < self.min_loss:
                 self.min_loss = valid_loss
                 self.save_results(valid_loss, i)
                 self.save_params(valid_loss, i)
+                self.save_checkpoint(valid_loss, i)
 
             if i >= iterations:
                 break
+
+    def run_against_valid(self):
+        cur_acc, cur_loss, tot_num = 0, 0, 0
+        for batch_valid, num in self.batches.gen_valid():
+            valid_loss, valid_acc, summary = self.sess.run(
+                [self.loss, self.accuracy, self.summaries], feed_dict={
+                    self.image: batch_valid['images'],
+                    #self.image: self.valid_images,
+                    self.label: batch_valid['ts'],
+                    self.keep_prob: 1.
+                })
+            cur_loss += valid_loss * num
+            cur_acc += valid_acc * num
+            tot_num += num
+        valid_loss = cur_loss / float(tot_num)
+        valid_acc = (cur_acc / float(tot_num)) * 100
+        return valid_loss, valid_acc, summary
 
     def run_against_test(self):
         preds_test = []

@@ -192,45 +192,24 @@ class batch_generator():
         self._val_size = val_size
 
         if class_size < 1.0:
-            #self._classes = random.sample(set(self._train['ts']), self._num_classes)
             self._classes = sorted(set(self._train['ts']))[:self._num_classes]
         else:
             self._classes = set(self._train['ts'])
 
-        #print 'original classes: ', Counter(self._train['ts'])
-        #print 'smaller classes: ', self._classes
 
         # idcs that we care about for train
         self._idcs_train = [idx for idx, id in enumerate(self._train['ts']) if id in self._classes]
         self._train_ids = [self._train['ts'][i] for i in self._idcs_train]
-        #print 'train: ', Counter(self._train_ids)
 
         self._idcs_train, self._train_ids, self._idcs_valid, self._valid_ids = self._split(self._train_ids, self._idcs_train, self._val_size)
 #
-        #print 'train (split valid): ', Counter(self._train_ids), Counter(self._valid_ids)
 
         self._train_size = train_size
         if self._train_size < 1.0:
             self._idcs_train, self._train_ids, _, _ = self._split(self._train_ids, self._idcs_train, self._train_size)
 
-        '''
-        print self._train_size
-        print 'train (make smaller): ', Counter(self._train_ids)
-
-        print "batch generator initiated ..."
-
-        print 'train'
-        print self._idcs_train
-        print self._train_ids
-        print [self._train['ts'][idx] for idx in self._idcs_train]
-
-        print 'valid'
-        print self._idcs_valid
-        print self._valid_ids
-        print [self._train['ts'][idx] for idx in self._idcs_valid]
-        '''
-
     def _split(self, ids, idcs_id, portion):
+        print portion
         idcs_train, idcs_valid = iter(
             StratifiedShuffleSplit(ids,
                                    n_iter=1,
