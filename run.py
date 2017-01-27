@@ -43,10 +43,10 @@ def run(params_range, fixed_params, samplings=5):
 
 if __name__ == '__main__':
     TRAIN_PATH = "./data/train_images.csv"    # has new augmented images
-    #TRAIN_PATH = "./data/train.csv"    # has new augmented images
+    TRAIN_PATH = "./data/train.csv"    # has new augmented images
     TEST_PATH = "./data/test.csv"
     IMAGE_PATHS = glob.glob("./data/128x128/*.jpg")
-    #IMAGE_PATHS = [e for e in IMAGE_PATHS if int(os.path.basename(os.path.splitext(e)[0])) <= 1584]
+    IMAGE_PATHS = [e for e in IMAGE_PATHS if int(os.path.basename(os.path.splitext(e)[0])) <= 1584]
 
 
     fixed_params = {

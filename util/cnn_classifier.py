@@ -123,6 +123,7 @@ class CnnClassifier:
 
     def train(self, iterations):
         print 'setting up'
+        saved_before = False
         self.setup()
         self.sess.run(tf.global_variables_initializer())
 
@@ -157,11 +158,12 @@ class CnnClassifier:
                 train_loss = []
                 train_acc = []
 
-            if valid_acc > 1.0 and valid_loss < self.min_loss:
-                self.min_loss = valid_loss
-                self.save_results(valid_loss, i)
-                self.save_params(valid_loss, i)
-                self.save_checkpoint(valid_loss, i)
+                if (valid_acc > 2.0 and valid_loss < self.min_loss) or (saved_before == False and i == iterations):
+                    saved_before = True
+                    self.min_loss = valid_loss
+                    self.save_results(valid_loss, i)
+                    self.save_params(valid_loss, i)
+                    self.save_checkpoint(valid_loss, i)
 
             if i >= iterations:
                 break
