@@ -74,6 +74,7 @@ if __name__ == '__main__':
         'd_out': (2, randint(10, 12)),
         'f_d_out': (2, randint(10, 12)),
         'dropout': (0, uniform(0, 1.0)),
+        'f_dropout': (0, uniform(0, 1.0)),
         'CHANNEL': 1,
         'LEARNING_RATE': (10, randint(-4, -1)),
         'report_interval': 10

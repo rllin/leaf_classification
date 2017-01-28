@@ -157,7 +157,8 @@ class CnnClassifier:
                 #self.image: images,
                 self.feature: batch['features'],
                 self.label: batch['ts'],
-                self.keep_prob: self.params['dropout']
+                self.keep_prob: self.params['dropout'],
+                self.f_keep_prob: self.params['f_dropout']
             })
             train_loss.append(res_train[1])
             train_acc.append(res_train[2])
@@ -193,7 +194,8 @@ class CnnClassifier:
                     #self.image: self.valid_images,
                     self.feature: batch_valid['features'],
                     self.label: batch_valid['ts'],
-                    self.keep_prob: 1.
+                    self.keep_prob: 1.,
+                    self.f_keep_prob: 1
                 })
             cur_loss += valid_loss * num
             cur_acc += valid_acc * num
@@ -209,7 +211,8 @@ class CnnClassifier:
             res_test = self.sess.run([probability], feed_dict={
                 self.image: batch['images'],
                 self.feature: batch['features'],
-                self.keep_prob: 1
+                self.keep_prob: 1,
+                self.f_keep_prob: 1
             })
             y_out = res_test[0]
             ids_test.append(batch['ids'])
