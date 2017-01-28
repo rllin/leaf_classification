@@ -65,14 +65,21 @@ class CnnClassifier:
             self.params['HEIGHT'],
             self.params['CHANNEL']],
             name='x_image_pl')
+        self.feature = tf.placeholder(tf.float32, [
+            self.params['BATCH_SIZE'],
+            64 * 3,
+            1],
+            name='x_features_pl')
         self.label = tf.placeholder(tf.float32, [
             self.params['BATCH_SIZE'],
             int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))],
             name='classes_pl')
         self.keep_prob = tf.placeholder(tf.float32, name='keep_prob_pl') #dropout (keep probability)
+        self.f_keep_prob = tf.placeholder(tf.float32, name='f_keep_prob_pl')
 
         # Construct model
         self.weights = {
+            'f_wc1': tf.Variable(tf.random_normal([self.params['f_conv1_num'], 1, self.params['f_conv1_out']]), name='f_wc1'),
             # 5x5 conv, 1 input, 32 outputs
             'wc1': tf.Variable(tf.random_normal([self.params['conv1_num'], self.params['conv1_num'], 1, self.params['conv1_out']]), name='wc1'),
             # 5x5 conv, 32 inputs, 64 outputs
@@ -80,13 +87,18 @@ class CnnClassifier:
             # fully connected, 7*7*64 inputs, 1024 outputs
             'wd1': tf.Variable(tf.random_normal([self.params['WIDTH'] / 4 * self.params['HEIGHT'] / 4 * self.params['conv2_out'], self.params['d_out']]), name='wd1'),
             # 1024 inputs, 10 outputs (class prediction)
-            'out': tf.Variable(tf.random_normal([self.params['d_out'], int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='out')
+            'out': tf.Variable(tf.random_normal([self.params['d_out'], int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='out'),
+            'f_out': tf.Variable(tf.random_normal([self.params['f_d_out'], int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='f_out'),
+            'f_wd1': tf.Variable(tf.random_normal([64 * 3 / 2 * self.params['f_conv1_out'], self.params['f_d_out']]), name='f_out')
         }
         self.biases = {
+            'f_bc1': tf.Variable(tf.random_normal([self.params['f_conv1_out']]), name='f_bc1'),
             'bc1': tf.Variable(tf.random_normal([self.params['conv1_out']]), name='bc1'),
             'bc2': tf.Variable(tf.random_normal([self.params['conv2_out']]), name='bc2'),
             'bd1': tf.Variable(tf.random_normal([self.params['d_out']]), name='bd1'),
-            'out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='b_out')
+            'out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='b_out'),
+            'f_out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='f_b_out'),
+            'f_bd1': tf.Variable(tf.random_normal([self.params['f_d_out']]), name='f_b_out')
         }
 
         self.batches = batches
@@ -109,7 +121,11 @@ class CnnClassifier:
         self.run_against_test()
 
     def setup(self):
-        prediction = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
+        print 'setup image prediction'
+        image_prediction = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
+        print 'setup features prediction'
+        features_prediction = helpers.f_conv_net(self.feature, self.weights, self.biases, self.f_keep_prob, self.net)
+        prediction = features_prediction + image_prediction
         probability = tf.nn.softmax(prediction)
         loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label))
         optimizer = tf.train.AdamOptimizer(learning_rate=self.params['LEARNING_RATE']).minimize(loss)

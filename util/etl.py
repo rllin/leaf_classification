@@ -32,21 +32,12 @@ class load_data():
         random.seed(self._seed)
 
         self._verbose_flag = verbose_flag
-        train_df = pd.read_csv(train_path, usecols=['id', 'species'])
+        train_df = pd.read_csv(train_path)
         test_df = pd.read_csv(test_path)
         image_paths = image_paths
         image_shape = image_shape
         self._load(train_df, test_df, image_paths, image_shape)
 
-    '''
-    def _frac(self, data):
-
-        inds = []
-        for k, v in data.groupby('species').indices.items():
-            num_take = min(2, int(round(self._data_frac * len(v))))
-            inds += random.sample(v, num_take)
-        return data.ix[random.sample(data.index, int(round(self._data_frac * len(data))))]
-    '''
 
     def _load(self, train_df, test_df, image_paths, image_shape):
         print "loading data ..."
@@ -101,9 +92,7 @@ class load_data():
                 features = row.drop(['id', 'species', 'image'], axis=0).values
             else:
                 features = row.drop(['id', 'image'], axis=0).values
-            #sample['margin'] = features[:64]
-            #sample['shape'] = features[64:128]
-            #sample['texture'] = features[128:]
+            sample['features'] = features
             if t_train is not None:
                 sample['t'] = np.asarray(t_train[i], dtype='int32')
             image = imread(row['image'], as_grey=True)
@@ -127,6 +116,7 @@ class load_data():
         #data['margins'] = np.zeros(feature_tot_shp, dtype='float32')
         #data['shapes'] = np.zeros(feature_tot_shp, dtype='float32')
         #data['textures'] = np.zeros(feature_tot_shp, dtype='float32')
+        data['features'] = np.zeros((len(df), 64 * 3), dtype='float32')
         if for_train:
             data['ts'] = np.zeros((len(df),), dtype='int32')
         else:
@@ -135,9 +125,7 @@ class load_data():
             key, value = pair
             #data['images'][i] = '%s/%s%s' % (os.path.dirname(self.image_paths[0]), value['image'], os.path.splitext(self.image_paths[0])[1])
             data['images'][i] = value['image']
-            #data['margins'][i] = value['margin']
-            #data['shapes'][i] = value['shape']
-            #data['textures'][i] = value['texture']
+            data['features'][i] = value['features']
             if for_train:
                 data['ts'][i] = value['t']
             else:
@@ -173,7 +161,7 @@ class load_data():
 
 class batch_generator():
     def __init__(self, train, test, batch_size=64, num_classes=99,
-                 num_iterations=5e3, num_features=64, seed=42, train_size=0.25, val_size=0.1, class_size=1.0):
+                 num_iterations=5e3, num_features=64*3, seed=42, train_size=0.25, val_size=0.1, class_size=1.0):
         print "initiating batch generator with (%d/%d) classes and %f of the training data and %f as validation" % (int(round(class_size * num_classes)), num_classes, train_size, val_size)
 
         num_classes = int(round(class_size * num_classes))
@@ -227,7 +215,7 @@ class batch_generator():
         #batch_holder['shapes'] = np.zeros((self._batch_size, self._num_features), dtype='float32')
         #batch_holder['textures'] = np.zeros((self._batch_size, self._num_features), dtype='float32')
         #batch_holder['images'] = np.zeros(tuple([self._batch_size] + self._image_shape), dtype='float32')
-        #batch_holder['features'] = np.zeros((self._batch_size, self._num_features * 3), dtype='float32')
+        batch_holder['features'] = np.zeros((self._batch_size, self._num_features), dtype='float32')
         if (purpose == "train") or (purpose == "valid"):
             batch_holder['images'] = np.zeros(tuple([self._batch_size] + self._image_shape), dtype='object')
             batch_holder['ts'] = np.zeros((self._batch_size, self._num_classes), dtype='float32')
@@ -245,6 +233,7 @@ class batch_generator():
             #batch['shapes'][i] = self._train['shapes'][idx]
             #batch['textures'][i] = self._train['textures'][idx]
             batch['images'][i] = self._train['images'][idx]
+            batch['features'][i] = self._train['features'][idx]
             #batch['features'][i] = np.concatenate((self._train['margins'][idx], self._train['shapes'][idx], self._train['textures'][idx]))
             batch['ts'][i] = onehot(np.asarray([self._train['ts'][idx]], dtype='float32'), self._num_classes)
             i += 1
@@ -264,6 +253,7 @@ class batch_generator():
             #batch['textures'][i] = self._test['textures'][idx]
             batch['images'].append(self._test['images'][idx])
             batch['ids'].append(self._test['ids'][idx])
+            batch['features'][i] = self._test['features'][idx]
             #batch['features'][i] = np.concatenate((self._test['margins'][idx], self._test['shapes'][idx], self._test['textures'][idx]))
             #batch['ids'].append(onehot(np.asarray([self._test['ids'][idx]], dtype='float32'), self._num_classes))
             i += 1
@@ -289,6 +279,7 @@ class batch_generator():
                 #batch['textures'][i] = self._train['textures'][idx]
                 batch['images'][i] = self._train['images'][idx]
                 batch['ts'][i] = onehot(np.asarray([self._train['ts'][idx]], dtype='float32'), self._num_classes)
+                batch['features'][i] = self._train['features'][idx]
                 #batch['features'][i] = np.concatenate((self._train['margins'][idx], self._train['shapes'][idx], self._train['textures'][idx]))
                 i += 1
                 if i >= self._batch_size:
