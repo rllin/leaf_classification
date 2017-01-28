@@ -26,6 +26,9 @@ def maxpool2d(x, k=2):
                           padding='SAME')
 
 def f_conv_net(x, weights, biases, f_dropout, net):
+    print x.get_shape()
+    x = tf.expand_dims(x, 2)
+    print x.get_shape()
     net['f_conv1'] = conv1d(x, weights['f_wc1'], biases['f_bc1'])
     print 'f_conv1: ', net['f_conv1'].get_shape()
     net['f_pool1'] = tf.squeeze(maxpool2d(tf.expand_dims(net['f_conv1'], 1), k=2))

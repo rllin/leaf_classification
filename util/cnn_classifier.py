@@ -67,8 +67,7 @@ class CnnClassifier:
             name='x_image_pl')
         self.feature = tf.placeholder(tf.float32, [
             self.params['BATCH_SIZE'],
-            64 * 3,
-            1],
+            64 * 3],
             name='x_features_pl')
         self.label = tf.placeholder(tf.float32, [
             self.params['BATCH_SIZE'],
@@ -192,7 +191,7 @@ class CnnClassifier:
                 [loss, accuracy, summaries], feed_dict={
                     self.image: batch_valid['images'],
                     #self.image: self.valid_images,
-                    self.feature: batch['features'],
+                    self.feature: batch_valid['features'],
                     self.label: batch_valid['ts'],
                     self.keep_prob: 1.
                 })
