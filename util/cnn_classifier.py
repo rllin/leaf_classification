@@ -156,6 +156,7 @@ class CnnClassifier:
             res_train = self.sess.run([optimizer, loss, accuracy, summaries], {
                 self.image: batch['images'],
                 #self.image: images,
+                self.feature: batch['features'],
                 self.label: batch['ts'],
                 self.keep_prob: self.params['dropout']
             })
@@ -191,6 +192,7 @@ class CnnClassifier:
                 [loss, accuracy, summaries], feed_dict={
                     self.image: batch_valid['images'],
                     #self.image: self.valid_images,
+                    self.feature: batch['features'],
                     self.label: batch_valid['ts'],
                     self.keep_prob: 1.
                 })
@@ -207,6 +209,7 @@ class CnnClassifier:
         for batch, num in self.batches.gen_test():
             res_test = self.sess.run([probability], feed_dict={
                 self.image: batch['images'],
+                self.feature: batch['features'],
                 self.keep_prob: 1
             })
             y_out = res_test[0]
