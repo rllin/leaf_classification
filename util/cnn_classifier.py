@@ -124,7 +124,8 @@ class CnnClassifier:
         image_prediction = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
         print 'setup features prediction'
         features_prediction = helpers.f_conv_net(self.feature, self.weights, self.biases, self.f_keep_prob, self.net)
-        prediction = features_prediction + image_prediction
+        #prediction = features_prediction + image_prediction
+        prediction = features_prediction
         probability = tf.nn.softmax(prediction)
         loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label))
         optimizer = tf.train.AdamOptimizer(learning_rate=self.params['LEARNING_RATE']).minimize(loss)

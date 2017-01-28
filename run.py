@@ -65,14 +65,14 @@ if __name__ == '__main__':
     np.random.seed(fixed_params['SEED'])
 
     params_range = {
-        'f_conv1_num': (0, randint(9, 11)),
-        'f_conv1_out': (2, randint(4, 6)),
+        'f_conv1_num': (0, randint(10, 13)),
+        'f_conv1_out': (2, randint(6, 8)),
         'conv1_num': (0, randint(9, 11)),
         'conv1_out': (2, randint(4, 6)),
         'conv2_num': (0, randint(9, 11)),
         'conv2_out': (2, randint(4, 6)),
         'd_out': (2, randint(10, 12)),
-        'f_d_out': (2, randint(10, 12)),
+        'f_d_out': (2, randint(11, 13)),
         'dropout': (0, uniform(0, 1.0)),
         'f_dropout': (0, uniform(0, 1.0)),
         'CHANNEL': 1,
