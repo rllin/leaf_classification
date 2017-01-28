@@ -66,11 +66,11 @@ if __name__ == '__main__':
 
     params_range = {
         'f_conv1_num': (0, randint(9, 11)),
-        'f_conv1_out': (2, randint(4, 5)),
+        'f_conv1_out': (2, randint(4, 6)),
         'conv1_num': (0, randint(9, 11)),
-        'conv1_out': (2, randint(4, 5)),
+        'conv1_out': (2, randint(4, 6)),
         'conv2_num': (0, randint(9, 11)),
-        'conv2_out': (2, randint(4, 5)),
+        'conv2_out': (2, randint(4, 6)),
         'd_out': (2, randint(10, 12)),
         'f_d_out': (2, randint(10, 12)),
         'dropout': (0, uniform(0, 1.0)),

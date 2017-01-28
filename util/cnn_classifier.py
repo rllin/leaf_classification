@@ -180,7 +180,7 @@ class CnnClassifier:
                     self.min_loss = valid_loss
                     self.save_results(valid_loss, i, probability)
                     self.save_params(valid_loss, i)
-                    self.save_checkpoint(valid_loss, i)
+                    #self.save_checkpoint(valid_loss, i)
 
             if i >= iterations:
                 break
