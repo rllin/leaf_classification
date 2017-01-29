@@ -34,7 +34,7 @@ if __name__ == '__main__':
         'WIDTH': 128,
         'BATCH_SIZE': 66, # do 64 make sure not larger than VALIDATION_SIZE *
         'NUM_CLASSES': 99,
-        'ITERATIONS': 5e3,
+        'ITERATIONS': 5e2,
         'SEED': 42,
         'TRAIN_SIZE': 1.0,
         'VALIDATION_SIZE': 0.2,
@@ -43,16 +43,16 @@ if __name__ == '__main__':
 
     np.random.seed(fixed_params['SEED'])
     param = {
-        'f_conv1_num': 10,
+        'f_conv1_num': 11,
         'f_conv1_out': 64,
         'conv1_num': 9,
         'conv1_out': 64,
         'conv2_num': 9,
         'conv2_out': 64,
         'd_out': 2048,
-        'f_d_out': 2048,
+        'f_d_out': 4096,
         'dropout': 0.399,
-        'f_dropout': 0.0466,
+        'f_dropout': 0.1834,
         'CHANNEL': 1,
         'LEARNING_RATE': 0.01,
         'report_interval': 10

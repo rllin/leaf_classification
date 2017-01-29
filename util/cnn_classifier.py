@@ -120,8 +120,8 @@ class CnnClassifier:
         self.run_against_test()
 
     def setup(self):
-        print 'setup image prediction'
-        image_prediction = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
+        #print 'setup image prediction'
+        #image_prediction = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
         print 'setup features prediction'
         features_prediction = helpers.f_conv_net(self.feature, self.weights, self.biases, self.f_keep_prob, self.net)
         #prediction = features_prediction + image_prediction
