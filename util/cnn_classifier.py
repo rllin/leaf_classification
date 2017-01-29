@@ -88,7 +88,9 @@ class CnnClassifier:
             # 1024 inputs, 10 outputs (class prediction)
             'out': tf.Variable(tf.random_normal([self.params['d_out'], int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='out'),
             'f_out': tf.Variable(tf.random_normal([self.params['f_d_out'], int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='f_out'),
-            'f_wd1': tf.Variable(tf.random_normal([64 * 3 / 2 * self.params['f_conv1_out'], self.params['f_d_out']]), name='f_out')
+            'f_wd1': tf.Variable(tf.random_normal([64 * 3 / 2 * self.params['f_conv1_out'], self.params['f_d_out']]), name='f_out'),
+            'i_conv_out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE'])), int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='i_conv_out'),
+            'f_conv_out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE'])), int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='f_conv_out'),
         }
         self.biases = {
             'f_bc1': tf.Variable(tf.random_normal([self.params['f_conv1_out']]), name='f_bc1'),
@@ -97,7 +99,8 @@ class CnnClassifier:
             'bd1': tf.Variable(tf.random_normal([self.params['d_out']]), name='bd1'),
             'out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='b_out'),
             'f_out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='f_b_out'),
-            'f_bd1': tf.Variable(tf.random_normal([self.params['f_d_out']]), name='f_b_out')
+            'f_bd1': tf.Variable(tf.random_normal([self.params['f_d_out']]), name='f_b_out'),
+            'f_i_conv_out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]))
         }
 
         self.batches = batches
@@ -120,12 +123,13 @@ class CnnClassifier:
         self.run_against_test()
 
     def setup(self):
-        #print 'setup image prediction'
-        #image_prediction = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
+        print 'setup image prediction'
+        image_prediction = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
         print 'setup features prediction'
         features_prediction = helpers.f_conv_net(self.feature, self.weights, self.biases, self.f_keep_prob, self.net)
         #prediction = features_prediction + image_prediction
-        prediction = features_prediction
+        #prediction = features_prediction
+        prediction = helpers.combine_f_i_nets(image_prediction, features_prediction, self.weights, self.biases, self.net)
         probability = tf.nn.softmax(prediction)
         loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label))
         optimizer = tf.train.AdamOptimizer(learning_rate=self.params['LEARNING_RATE']).minimize(loss)

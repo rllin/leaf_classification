@@ -25,6 +25,14 @@ def maxpool2d(x, k=2):
     return tf.nn.max_pool(x, ksize=[1, k, k, 1], strides=[1, k, k, 1],
                           padding='SAME')
 
+def combine_f_i_nets(i_conv_net, f_conv_net, weights, biases, net):
+    net['combined'] = tf.add(
+        tf.add(tf.matmul(i_conv_net, weights['i_conv_out']),
+           tf.matmul(f_conv_net, weights['f_conv_out'])),
+        biases['f_i_conv_out'])
+    return net['combined']
+
+
 def f_conv_net(x, weights, biases, f_dropout, net):
     print x.get_shape()
     x = tf.expand_dims(x, 2)
