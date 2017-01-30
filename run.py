@@ -59,7 +59,7 @@ if __name__ == '__main__':
         'WIDTH': 128,
         'BATCH_SIZE': 66, # do 64 make sure not larger than VALIDATION_SIZE *
         'NUM_CLASSES': 99,
-        'ITERATIONS': 5e2,
+        'ITERATIONS': 2e2,
         'SEED': 42,
         'TRAIN_SIZE': 1.0,
         'VALIDATION_SIZE': 0.2,
@@ -70,15 +70,16 @@ if __name__ == '__main__':
 
     params_range = {
         'f_conv1_num': (0, randint(4, 10)),
-        'f_conv1_out': (2, randint(8, 10)),
+        'f_conv1_out': (2, randint(4, 6)),
         'conv1_num': (0, randint(4, 10)),
-        'conv1_out': (2, randint(8, 10)),
+        'conv1_out': (2, randint(4, 6)),
         'conv2_num': (0, randint(4, 10)),
-        'conv2_out': (2, randint(8, 10)),
-        'd_out': (2, randint(8, 10)),
-        'f_d_out': (2, randint(8, 10)),
-        'dropout': (0, uniform(0, 1.0)),
-        'f_dropout': (0, uniform(0, 1.0)),
+        'conv2_out': (2, randint(4, 6)),
+        'd_out': (2, randint(9, 11)),
+        'f_d_out': (2, randint(9, 11)),
+        'dropout': (0, uniform(0.5, 0.5)),
+        'f_dropout': (0, uniform(0.5, 0.5)),
+        'l2_penalty': (10, randint(-3, -1)),
         'CHANNEL': 1,
         'LEARNING_RATE': (10, randint(-3, -1)),
         'report_interval': 10
