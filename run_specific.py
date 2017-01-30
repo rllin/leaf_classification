@@ -43,18 +43,18 @@ if __name__ == '__main__':
 
     np.random.seed(fixed_params['SEED'])
     param = {
-        'f_conv1_num': 11,
-        'f_conv1_out': 64,
-        'conv1_num': 9,
-        'conv1_out': 64,
+        'f_conv1_num': 12,
+        'f_conv1_out': 32,
+        'conv1_num': 10,
+        'conv1_out': 32,
         'conv2_num': 9,
-        'conv2_out': 64,
+        'conv2_out': 32,
         'd_out': 2048,
         'f_d_out': 4096,
-        'dropout': 0.399,
-        'f_dropout': 0.1834,
+        'dropout': 0.3337,
+        'f_dropout': 0.14286,
         'CHANNEL': 1,
-        'LEARNING_RATE': 0.01,
+        'LEARNING_RATE': 0.001,
         'report_interval': 10
     }
 

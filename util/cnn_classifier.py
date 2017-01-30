@@ -55,10 +55,10 @@ def define_scope(function, scope=None, *args, **kwargs):
 
 
 class CnnClassifier:
-    def __init__(self, train, test, classes, batches, params):
+    def __init__(self, train, test, classes, batches, params, seed=42):
         self.classes = classes
         self.params = params
-
+	tf.set_random_seed(seed)
         self.image = tf.placeholder(tf.float32, [
             self.params['BATCH_SIZE'],
             self.params['WIDTH'],
@@ -149,10 +149,12 @@ class CnnClassifier:
         prediction, probability, loss, optimizer, accuracy, error, summaries = self.setup()
 
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-        summaries_path = "tensorboard/%s/logs" % (timestamp)
-        summarywriter = tf.train.SummaryWriter(summaries_path, self.sess.graph)
-
+        #summaries_path = "tensorboard/%s/logs" % (timestamp)
+        #summarywriter = tf.train.SummaryWriter(summaries_path, self.sess.graph)
+	f = open('./tmp/logs/%s.txt' % timestamp, 'w')
+        f.write(json.dumps(self.params, indent=4) + '\n')
         print "Iter \t Batch Loss \t Batch Accuracy \t Valid Loss \t Valid Accuracy \t Time delta\n"
+        f.write("Iter \t Batch Loss \t Batch Accuracy \t Valid Loss \t Valid Accuracy \t Time delta\n")
         time_last = time.time()
         train_loss, train_acc = [], []
         for i, batch in enumerate(self.batches.gen_train()):
@@ -175,6 +177,7 @@ class CnnClassifier:
                 train_acc = sum(train_acc) / float(len(train_acc)) * 100
                 # Calculate batch loss and accuracy
                 print "%d:\t  %.2f\t\t  %.1f\t\t  %.2f\t\t  %.2f \t\t %.2f" % (i, train_loss, train_acc, valid_loss, valid_acc, time.time() - time_last)
+                f.write("%d:\t  %.2f\t\t  %.1f\t\t  %.2f\t\t  %.2f \t\t %.2f\n" % (i, train_loss, train_acc, valid_loss, valid_acc, time.time() - time_last))
                 #summarywriter.add_summary(summary, i)
                 time_last = time.time()
                 train_loss = []

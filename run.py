@@ -39,7 +39,11 @@ def run(params_range, fixed_params, samplings=5):
         param.update(fixed_params)
         print 'running with the following parameters: \n %s' % json.dumps(param, indent=4)
         model = cnn_classifier.CnnClassifier(data.train, data.test, data.le, batches, param)
-        model.train(param['ITERATIONS'])
+	try:
+            model.train(param['ITERATIONS'])
+        except:
+            print 'not enough memory'
+        
 
 if __name__ == '__main__':
     TRAIN_PATH = "./data/train_images.csv"    # has new augmented images
@@ -55,7 +59,7 @@ if __name__ == '__main__':
         'WIDTH': 128,
         'BATCH_SIZE': 66, # do 64 make sure not larger than VALIDATION_SIZE *
         'NUM_CLASSES': 99,
-        'ITERATIONS': 2e2,
+        'ITERATIONS': 5e2,
         'SEED': 42,
         'TRAIN_SIZE': 1.0,
         'VALIDATION_SIZE': 0.2,
@@ -65,20 +69,20 @@ if __name__ == '__main__':
     np.random.seed(fixed_params['SEED'])
 
     params_range = {
-        'f_conv1_num': (0, randint(10, 13)),
-        'f_conv1_out': (2, randint(6, 8)),
-        'conv1_num': (0, randint(9, 11)),
-        'conv1_out': (2, randint(4, 6)),
-        'conv2_num': (0, randint(9, 11)),
-        'conv2_out': (2, randint(4, 6)),
-        'd_out': (2, randint(10, 12)),
-        'f_d_out': (2, randint(11, 13)),
+        'f_conv1_num': (0, randint(4, 10)),
+        'f_conv1_out': (2, randint(8, 10)),
+        'conv1_num': (0, randint(4, 10)),
+        'conv1_out': (2, randint(8, 10)),
+        'conv2_num': (0, randint(4, 10)),
+        'conv2_out': (2, randint(8, 10)),
+        'd_out': (2, randint(8, 10)),
+        'f_d_out': (2, randint(8, 10)),
         'dropout': (0, uniform(0, 1.0)),
         'f_dropout': (0, uniform(0, 1.0)),
         'CHANNEL': 1,
-        'LEARNING_RATE': (10, randint(-4, -1)),
+        'LEARNING_RATE': (10, randint(-3, -1)),
         'report_interval': 10
     }
-    run(params_range, fixed_params, 5)
+    run(params_range, fixed_params, 30)
 
 
