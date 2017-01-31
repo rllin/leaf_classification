@@ -1,21 +1,7 @@
-from datetime import datetime
-import time
 import pickle
 import glob
 
-import matplotlib
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import tensorflow as tf
-
-from sklearn.preprocessing import LabelEncoder
-from sklearn.cross_validation import StratifiedShuffleSplit
-from skimage.io import imread
-from skimage.transform import resize
-from tensorflow.python.framework.ops import reset_default_graph
-
-from util import etl, helpers, cnn_classifier
+from util import etl, cnn_classifier
 
 
 TRAIN_PATH = "./data/train.csv"

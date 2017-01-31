@@ -1,20 +1,9 @@
 import os
-import subprocess
-import itertools
-from datetime import datetime
-import time
 import glob
-import random
 import pickle
 import json
 
-import pandas as pd
-import tensorflow as tf
 import numpy as np
-
-from sklearn.preprocessing import LabelEncoder
-from skimage.io import imread
-from skimage.transform import resize
 
 from scipy.stats import randint, uniform
 

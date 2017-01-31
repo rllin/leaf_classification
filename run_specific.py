@@ -1,25 +1,11 @@
-
 import os
-import subprocess
-import itertools
-from datetime import datetime
-import time
 import glob
-import random
-import pickle
 import json
 
-import pandas as pd
-import tensorflow as tf
 import numpy as np
 
-from sklearn.preprocessing import LabelEncoder
-from skimage.io import imread
-from skimage.transform import resize
+from util import etl, cnn_classifier
 
-from scipy.stats import randint, uniform
-
-from util import etl, helpers, cnn_classifier
 if __name__ == '__main__':
     TRAIN_PATH = "./data/train_images.csv"    # has new augmented images
     TRAIN_PATH = "./data/train.csv"    # has new augmented images
