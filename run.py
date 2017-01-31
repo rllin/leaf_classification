@@ -69,12 +69,29 @@ if __name__ == '__main__':
     np.random.seed(fixed_params['SEED'])
 
     params_range = {
+        'f_conv1_num': 8, 
+        'f_conv1_out': 16,
+        'conv1_num': 7, 
+        'conv1_out': 32 ,
+        'conv2_num': 7, 
+        'conv2_out': 32, 
+        'd_out': 2048, 
+        'f_d_out': 2048, 
+        'dropout': (0, uniform(0.5, 0.5)),
+        'f_dropout': (0, uniform(0.5, 0.5)),
+        'l2_penalty': (10, randint(-3, -1)),
+        'CHANNEL': 1,
+        'LEARNING_RATE': (10, randint(-3, -1)),
+        'report_interval': 10
+    }
+    '''
+    params_range = {
         'f_conv1_num': (0, randint(4, 10)),
         'f_conv1_out': (2, randint(4, 6)),
         'conv1_num': (0, randint(4, 10)),
-        'conv1_out': (2, randint(4, 6)),
+        'conv1_out': (2, randint(6, 10)),
         'conv2_num': (0, randint(4, 10)),
-        'conv2_out': (2, randint(4, 6)),
+        'conv2_out': (2, randint(6, 10)),
         'd_out': (2, randint(9, 11)),
         'f_d_out': (2, randint(9, 11)),
         'dropout': (0, uniform(0.5, 0.5)),
@@ -84,6 +101,7 @@ if __name__ == '__main__':
         'LEARNING_RATE': (10, randint(-3, -1)),
         'report_interval': 10
     }
-    run(params_range, fixed_params, 30)
+    '''
+    run(params_range, fixed_params, 20)
 
 

@@ -56,6 +56,7 @@ def define_scope(function, scope=None, *args, **kwargs):
 
 class CnnClassifier:
     def __init__(self, train, test, classes, batches, params, seed=42):
+	tf.reset_default_graph()
         self.classes = classes
         self.params = params
 	tf.set_random_seed(seed)
@@ -108,7 +109,7 @@ class CnnClassifier:
         self.net = {}
         self.min_loss = 1e99
         self.last_ckpt, self.last_params, self.last_results = None, None, None
-
+	
         self.sess = tf.Session()
         self.saver = tf.train.Saver()
         self.sess.run(tf.global_variables_initializer())
@@ -157,6 +158,7 @@ class CnnClassifier:
         #summaries_path = "tensorboard/%s/logs" % (timestamp)
         #summarywriter = tf.train.SummaryWriter(summaries_path, self.sess.graph)
 	f = open('./tmp/logs/%s.txt' % timestamp, 'w')
+	#f.write('only features\n')
         f.write(json.dumps(self.params, indent=4) + '\n')
         print "Iter \t Batch Loss \t Batch Accuracy \t Valid Loss \t Valid Accuracy \t Time delta\n"
         f.write("Iter \t Batch Loss \t Batch Accuracy \t Valid Loss \t Valid Accuracy \t Time delta\n")
@@ -188,12 +190,12 @@ class CnnClassifier:
                 train_loss = []
                 train_acc = []
 
-                if (valid_acc > 99.0 and valid_loss < self.min_loss) or (saved_before == False and i == iterations):
+                if (valid_acc > 95.0 and valid_loss < self.min_loss) or (saved_before == False and i == iterations):
                     saved_before = True
                     self.min_loss = valid_loss
                     self.save_results(valid_loss, valid_acc, i, probability)
                     self.save_params(valid_loss, valid_acc, i)
-                    #self.save_checkpoint(valid_loss, valid_acc, i)
+                    self.save_checkpoint(valid_loss, valid_acc, i)
 
             if i >= iterations:
                 break

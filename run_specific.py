@@ -34,7 +34,7 @@ if __name__ == '__main__':
         'WIDTH': 128,
         'BATCH_SIZE': 66, # do 64 make sure not larger than VALIDATION_SIZE *
         'NUM_CLASSES': 99,
-        'ITERATIONS': 2e2,
+        'ITERATIONS': 5e4,
         'SEED': 42,
         'TRAIN_SIZE': 1.0,
         'VALIDATION_SIZE': 0.2,
@@ -43,20 +43,20 @@ if __name__ == '__main__':
 
     np.random.seed(fixed_params['SEED'])
     param = {
-        'f_conv1_num': 5,
-        'f_conv1_out': 16,
-        'conv1_num': 5,
-        'conv1_out': 16,
-        'conv2_num': 5,
+        'f_conv1_num': 8,
+        'f_conv1_out': 512,
+        'conv1_num': 7,
+        'conv1_out': 32,
+        'conv2_num': 7,
         'conv2_out': 32,
         'd_out': 1024,
         'f_d_out': 1024,
-        'dropout': 0.3337,
-        'f_dropout': 0.14286,
+        'dropout': 0.57143340896097039,
+        'f_dropout': 0.825544423647442644,
         'l2_penalty': 0.01,
         'CHANNEL': 1,
-        'LEARNING_RATE': 0.01,
-        'report_interval': 10
+        'LEARNING_RATE': 0.001,
+        'report_interval': 100 
     }
 
     data = etl.load_data(train_path=TRAIN_PATH,

@@ -1,0 +1,32 @@
+{
+    "f_d_out": 1024, 
+    "dropout": 0.5714334089609704, 
+    "f_dropout": 0.8255444236474426, 
+    "TRAIN_SIZE": 1.0, 
+    "WIDTH": 128, 
+    "SEED": 42, 
+    "BATCH_SIZE": 66, 
+    "ITERATIONS": 10000.0, 
+    "f_conv1_num": 8, 
+    "HEIGHT": 128, 
+    "CHANNEL": 1, 
+    "conv1_out": 32, 
+    "VALIDATION_SIZE": 0.2, 
+    "conv2_num": 7, 
+    "report_interval": 100, 
+    "conv2_out": 32, 
+    "NUM_CLASSES": 99, 
+    "d_out": 1024, 
+    "CLASS_SIZE": 1.0, 
+    "l2_penalty": 0.01, 
+    "conv1_num": 7, 
+    "LEARNING_RATE": 0.001, 
+    "f_conv1_out": 16
+}
+Iter 	 Batch Loss 	 Batch Accuracy 	 Valid Loss 	 Valid Accuracy 	 Time delta
+0:	  2884863488.00		  0.0		  1648508885.33		  2.02 		 7.25
+100:	  486967880.32		  16.4		  97495842.67		  31.31 		 185.39
+200:	  56496317.57		  50.1		  63635405.33		  42.93 		 185.86
+300:	  20234863.50		  69.2		  56754026.67		  45.45 		 185.66
+400:	  8963485.44		  81.2		  50538528.00		  45.96 		 185.92
+500:	  5161164.42		  86.6		  49362869.33		  50.51 		 185.98
