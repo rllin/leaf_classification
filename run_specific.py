@@ -34,7 +34,7 @@ if __name__ == '__main__':
         'WIDTH': 128,
         'BATCH_SIZE': 66, # do 64 make sure not larger than VALIDATION_SIZE *
         'NUM_CLASSES': 99,
-        'ITERATIONS': 5e4,
+        'ITERATIONS': 5e3,
         'SEED': 42,
         'TRAIN_SIZE': 1.0,
         'VALIDATION_SIZE': 0.2,

@@ -131,12 +131,14 @@ class CnnClassifier:
         #prediction = features_prediction
         prediction = helpers.combine_f_i_nets(image_prediction, features_prediction, self.weights, self.biases, self.net)
         probability = tf.nn.softmax(prediction)
+        '''
 	l2_loss = self.params['l2_penalty'] * (tf.nn.l2_loss(self.weights['f_wc1']) 
                                                + tf.nn.l2_loss(self.weights['wc1']) 
                                                + tf.nn.l2_loss(self.weights['wc2']) 
                                                + tf.nn.l2_loss(self.weights['wd1']))
-        #loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label))
-        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label) + l2_loss)
+	'''
+        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label))
+        #loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label) + l2_loss)
         optimizer = tf.train.AdamOptimizer(learning_rate=self.params['LEARNING_RATE']).minimize(loss)
         correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(self.label, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
