@@ -50,6 +50,9 @@ def define_scope(function, scope=None, *args, **kwargs):
 
 
 class CnnClassifier:
+    """Trains and validates streams from batch object according to certain
+    parameters.
+    """
     def __init__(self, train, test, classes, batches, params, seed=42):
 	tf.reset_default_graph()
         self.classes = classes

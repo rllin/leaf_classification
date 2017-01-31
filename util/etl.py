@@ -11,18 +11,18 @@ from skimage.io import imread, imsave
 from skimage.transform import rotate
 
 def onehot(t, num_classes):
+    """Converts matrix of id numbers into a matrix of onehot vectors
+    representing the same."""
     out = np.zeros((t.shape[0], num_classes))
     for row, col in enumerate(t):
         out[int(row), int(col)] = 1
     return out
 
 class load_data():
-    # data_train, data_test and le are public
-    def __init__(self, train_path, test_path, image_paths, image_shape=(128, 128), seed=42, verbose_flag=False):
-        self._seed = seed
-        random.seed(self._seed)
-
-        self._verbose_flag = verbose_flag
+    """Loads data from csv and image directories.
+    """
+    def __init__(self, train_path, test_path, image_paths, image_shape=(128, 128), seed=42):
+        """Reads csvs and loads images."""
         train_df = pd.read_csv(train_path)
         test_df = pd.read_csv(test_path)
         image_paths = image_paths
@@ -31,6 +31,7 @@ class load_data():
 
     @staticmethod
     def _path_to_dict(image_paths):
+        """Matches path to image with image number."""
         path_dict = dict()
         for image_path in image_paths:
             num_path = int(os.path.basename(image_path[:-4]))
@@ -39,6 +40,7 @@ class load_data():
 
     @staticmethod
     def _merge_image_df(df, path_dict):
+        """Merges ids for images with image path."""
         split_path_dict = dict()
         for _, row in df.iterrows():
             split_path_dict[row['id']] = path_dict[row['id']]
@@ -47,8 +49,6 @@ class load_data():
         return df_image
 
     def _load(self, train_df, test_df, image_paths, image_shape):
-        print "loading data ..."
-        # load train.csv
         self.image_paths = image_paths
         path_dict = self._path_to_dict(self.image_paths) # numerate image paths and make it a dict
         # merge image paths with data frame
@@ -68,6 +68,7 @@ class load_data():
 
 
     def _make_dataset(self, df, image_shape, t_train=None):
+        """Matches image with features and image identification."""
         if t_train is not None:
             print "loading train ..."
         else:
@@ -91,13 +92,11 @@ class load_data():
             #image = os.path.splitext(os.path.basename(row['image']))[0]
             sample['image'] = image
             data[row['id']] = sample
-            if i % 100 == 0 and self._verbose_flag:
-                print "\t%d of %d" % (i, len(df))
         return data
 
     @staticmethod
     def _format_dataset(df, for_train):
-        # making arrays with all data in, is nessesary when doing validation split
+        """Merge all features."""
         data = dict()
         value = df.values()[0]
         img_tot_shp = tuple([len(df)] + list(value['image'].shape))
@@ -123,7 +122,7 @@ class load_data():
         return data
 
     def _augment_dataset(df):
-        '''Run once to augment.  Just read in the future.'''
+        """Augments images.  Typically not useful for this object."""
         new_dataset = []
         id_start = df['id'].max() + 1
         counter = 0
@@ -150,6 +149,7 @@ class load_data():
 
 
 class batch_generator():
+    """Generates batches for training, validation, and testing."""
     def __init__(self, train, test, batch_size=64, num_classes=99,
                  num_iterations=5e3, num_features=64*3, seed=42, train_size=0.25, val_size=0.1, class_size=1.0):
         print "initiating batch generator with (%d/%d) classes and %f of the training data and %f as validation" % (int(round(class_size * num_classes)), num_classes, train_size, val_size)
