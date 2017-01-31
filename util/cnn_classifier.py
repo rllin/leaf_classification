@@ -54,7 +54,6 @@ class CnnClassifier:
     parameters.
     """
     def __init__(self, train, test, classes, batches, params, seed=42):
-	tf.reset_default_graph()
         self.classes = classes
         self.params = params
 	tf.set_random_seed(seed)
@@ -121,22 +120,21 @@ class CnnClassifier:
         self.run_against_test(probability)
 
     def setup(self):
-        print 'setup image prediction'
+        """Sets up convolution nets and calculates loss and other metrics."""
         image_prediction = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
-        print 'setup features prediction'
         features_prediction = helpers.f_conv_net(self.feature, self.weights, self.biases, self.f_keep_prob, self.net)
-        #prediction = features_prediction + image_prediction
-        #prediction = features_prediction
+
+        prediction = features_prediction + image_prediction
         prediction = helpers.combine_f_i_nets(image_prediction, features_prediction, self.weights, self.biases, self.net)
         probability = tf.nn.softmax(prediction)
+        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label))
         '''
 	l2_loss = self.params['l2_penalty'] * (tf.nn.l2_loss(self.weights['f_wc1'])
                                                + tf.nn.l2_loss(self.weights['wc1'])
                                                + tf.nn.l2_loss(self.weights['wc2'])
                                                + tf.nn.l2_loss(self.weights['wd1']))
+        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label) + l2_loss)
 	'''
-        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label))
-        #loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label) + l2_loss)
         optimizer = tf.train.AdamOptimizer(learning_rate=self.params['LEARNING_RATE']).minimize(loss)
         correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(self.label, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
@@ -149,10 +147,9 @@ class CnnClassifier:
 
 
     def train(self, iterations):
-        print 'setting up'
+        """Takes batches and trains while printing to std.out and logging."""
         saved_before = False
         prediction, probability, loss, optimizer, accuracy, error, summaries = self.setup()
-
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         #summaries_path = "tensorboard/%s/logs" % (timestamp)
         #summarywriter = tf.train.SummaryWriter(summaries_path, self.sess.graph)
@@ -200,6 +197,7 @@ class CnnClassifier:
                 break
 
     def run_against_valid(self, loss, accuracy, summaries):
+        """Runs current network against validation batch."""
         cur_acc, cur_loss, tot_num = 0, 0, 0
         for batch_valid, num in self.batches.gen_valid():
             valid_loss, valid_acc, summary = self.sess.run(
@@ -219,6 +217,7 @@ class CnnClassifier:
         return valid_loss, valid_acc, summary
 
     def run_against_test(self, probability):
+        """Runs trained network against test batch."""
         preds_test = []
         ids_test = []
         for batch, num in self.batches.gen_test():
@@ -240,8 +239,7 @@ class CnnClassifier:
 
 
     def save_checkpoint(self, valid_loss, valid_acc, iteration):
-        # haven't figured out how to reload in the context of
-        # session variables being ownd also by this class
+        """Saves checkpoint and overwrites previous save to save space."""
         model_folder = './tmp/models/'
         current_ckpt = 'model_%f_%f_%i_%s' % (valid_loss, valid_acc, iteration, datetime.now().isoformat())
         os.makedirs('%s%s' % (model_folder, current_ckpt))
@@ -255,6 +253,7 @@ class CnnClassifier:
         self.last_ckpt = current_ckpt
 
     def save_params(self, valid_loss, valid_acc, iteration):
+        """Saves parameters that were used for this training session."""
         current_params = './tmp/params/params_%f_%f_%i_%s.json' % (valid_loss, valid_acc, iteration, datetime.now().isoformat())
         with open(current_params, 'w') as f:
             json.dump(self.params, f)
@@ -265,8 +264,8 @@ class CnnClassifier:
             self.last_params = current_params
 
     def save_results(self, valid_loss, valid_acc, iteration, probability):
+        """Converts to and saves submission csv for Kaggle."""
         ids_test, preds_test = self.run_against_test(probability)
-
         preds_df = pd.DataFrame(preds_test, columns=self.classes.classes_)
         preds_df = preds_df.div(preds_df.sum(axis=1), axis=0)
         ids_test_df = pd.DataFrame(ids_test, columns=["id"])
