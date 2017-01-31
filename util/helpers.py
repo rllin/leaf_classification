@@ -67,15 +67,16 @@ def conv_net(x, weights, biases, dropout, net):
     net['conv2'] = conv2d(net['pool1'], weights['wc2'], biases['bc2'])
     # Max Pooling (down-sampling)
     net['pool2'] = maxpool2d(net['conv2'], k=2)
-
+    ''' 
     # Convolution Layer
     net['conv3'] = conv2d(net['pool2'], weights['wc3'], biases['bc3'])
     # Max Pooling (down-sampling)
     net['pool3'] = maxpool2d(net['conv3'], k=2)
+    '''
 
     # Fully connected layer
     # Reshape conv2 output to fit fully connected layer input
-    net['fc1'] = tf.reshape(net['pool3'], [-1, weights['wd1'].get_shape().as_list()[0]])
+    net['fc1'] = tf.reshape(net['pool2'], [-1, weights['wd1'].get_shape().as_list()[0]])
     print 'reshape pool2 to: ', net['fc1'].get_shape()
     net['fc1'] = tf.add(tf.matmul(net['fc1'], weights['wd1']), biases['bd1'])
     net['fc1'] = tf.nn.relu(net['fc1'])
@@ -89,8 +90,8 @@ def conv_net(x, weights, biases, dropout, net):
     print net['pool1'].get_shape()
     print net['conv2'].get_shape()
     print net['pool2'].get_shape()
-    print net['conv3'].get_shape()
-    print net['pool3'].get_shape()
+    #print net['conv3'].get_shape()
+    #print net['pool3'].get_shape()
     print 'drop: ', net['fc1'].get_shape()
     print net['out'].get_shape()
     print 'done'
