@@ -1,23 +1,14 @@
 import os
-import subprocess
-import itertools
-from datetime import datetime
-import time
-import glob
-import random
 import pickle
-from collections import Counter
+import random
 
 import pandas as pd
-import tensorflow as tf
 import numpy as np
 
 from sklearn.preprocessing import LabelEncoder
 from sklearn.cross_validation import StratifiedShuffleSplit
 from skimage.io import imread, imsave
-from skimage.transform import resize, rotate
-
-import helpers
+from skimage.transform import rotate
 
 def onehot(t, num_classes):
     out = np.zeros((t.shape[0], num_classes))
@@ -47,7 +38,7 @@ class load_data():
 
     def _merge_image_df(df, path_dict):
         split_path_dict = dict()
-        for index, row in df.iterrows():
+        for _, row in df.iterrows():
             split_path_dict[row['id']] = path_dict[row['id']]
         image_frame = pd.DataFrame(split_path_dict.values(), columns=['image'])
         df_image =  pd.concat([image_frame, df], axis=1)
@@ -111,7 +102,6 @@ class load_data():
         value = df.values()[0]
         img_tot_shp = tuple([len(df)] + list(value['image'].shape))
         data['images'] = np.zeros(img_tot_shp, dtype='float32')
-        feature_tot_shp = (len(df), 64)
         #data['images'] = np.zeros((len(df),), dtype='object')
         #data['margins'] = np.zeros(feature_tot_shp, dtype='float32')
         #data['shapes'] = np.zeros(feature_tot_shp, dtype='float32')
@@ -137,7 +127,7 @@ class load_data():
         new_dataset = []
         id_start = df['id'].max() + 1
         counter = 0
-        for index, row in df.iterrows():
+        for _, row in df.iterrows():
             image = imread(row['image'], as_grey=True)
             for angle in [90, 180, 270, 'LR', 'UD']:
                 new_row = dict()
@@ -289,12 +279,4 @@ class batch_generator():
                     iteration += 1
                     if iteration >= self._num_iterations:
                         break
-
-if __name__ == '__main__':
-    '''
-    for im_path in glob.glob('./data/images/*.jpg'):
-	image = imread(im_path, as_grey=True)
-	new_image = helpers.resize_proportionally(image, (1706, 1706))
-	imsave('./data/standardized_images/%s' % (path.basename(im_path)), new_image)
-    '''
 
