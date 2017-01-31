@@ -1,7 +1,7 @@
 import pickle
 import glob
 
-from util import etl, cnn_classifier
+from util import cnn_classifier
 
 
 TRAIN_PATH = "./data/train.csv"

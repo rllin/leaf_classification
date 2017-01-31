@@ -1,6 +1,5 @@
 import os
 import glob
-import pickle
 import json
 
 import numpy as np

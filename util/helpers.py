@@ -1,8 +1,6 @@
-import json
-
 import numpy as np
 from scipy.stats import randint, uniform
-from skimage.io import imread, imshow
+from skimage.io import imshow
 from skimage.transform import resize
 from skimage.util import pad
 import tensorflow as tf
@@ -136,32 +134,3 @@ def random_search(params_range, samplings):
                 param[param_name] = value
         params[instance] = param
     return params
-
-
-if __name__ == '__main__':
-    VALIDATION_SIZE = 0.1
-    SEED = 42
-    TRAIN_SIZE = 1.0
-    ITERATIONS = 1e1
-    params_range = {
-	'conv1_num': (0, randint(1, 10)),
-	'conv1_out': (2, randint(2, 8)),
-	'conv2_num': (0, randint(1, 10)),
-	'conv2_out': (2, randint(2, 8)),
-	'd_out': (2, randint(4, 10)),
-	'dropout': (0, uniform(0, 1.0)),
-	'HEIGHT': 128,
-	'WIDTH': 128,
-	'CHANNEL': 1,
-	'BATCH_SIZE': 64,
-	'NUM_CLASSES': 99,
-	'VALIDATION_SIZE': VALIDATION_SIZE,
-	'SEED': SEED,
-	'TRAIN_SIZE': TRAIN_SIZE,
-	'CLASS_SIZE': 0.1,
-	'ITERATIONS': ITERATIONS,
-	'LEARNING_RATE': (10, randint(-6, 1)),
-	'report_interval': 1
-    }
-    a = random_search(params_range, 5)
-    print a[0]

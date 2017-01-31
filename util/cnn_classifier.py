@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
 import time
-import pickle
 import glob
 import functools
 import json
@@ -115,8 +114,8 @@ class CnnClassifier:
 
     def run_restore(self, ckpt_file):
         self.restore(ckpt_file)
-        self.setup()
-        self.run_against_test()
+        prediction, probability, loss, optimizer, accuracy, error, summaries = self.setup()
+        self.run_against_test(probability)
 
     def setup(self):
         print 'setup image prediction'
