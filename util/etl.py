@@ -29,6 +29,7 @@ class load_data():
         image_shape = image_shape
         self._load(train_df, test_df, image_paths, image_shape)
 
+    @staticmethod
     def _path_to_dict(image_paths):
         path_dict = dict()
         for image_path in image_paths:
@@ -36,6 +37,7 @@ class load_data():
             path_dict[num_path] = image_path
         return path_dict
 
+    @staticmethod
     def _merge_image_df(df, path_dict):
         split_path_dict = dict()
         for _, row in df.iterrows():
@@ -48,12 +50,11 @@ class load_data():
         print "loading data ..."
         # load train.csv
         self.image_paths = image_paths
-        path_dict = _path_to_dict(self.image_paths) # numerate image paths and make it a dict
+        path_dict = self._path_to_dict(self.image_paths) # numerate image paths and make it a dict
         # merge image paths with data frame
 
-        self.train_image_df = _merge_image_df(train_df, path_dict)
-        self.test_image_df = _merge_image_df(test_df, path_dict)
-        # label encoder-decoder (self. because we need it later)
+        self.train_image_df = self._merge_image_df(train_df, path_dict)
+        self.test_image_df = self._merge_image_df(test_df, path_dict)
         self.le = LabelEncoder().fit(self.train_image_df['species'])
         # labels for train
         t_train = self.le.transform(self.train_image_df['species'])
@@ -61,11 +62,9 @@ class load_data():
         train_data = self._make_dataset(self.train_image_df, image_shape, t_train)
         test_data = self._make_dataset(self.test_image_df, image_shape)
         # need to reformat the train for validation split reasons in the batch_generator
-        self.train = _format_dataset(train_data, for_train=True)
-        self.test = _format_dataset(test_data, for_train=False)
+        self.train = self._format_dataset(train_data, for_train=True)
+        self.test = self._format_dataset(test_data, for_train=False)
         print "data loaded"
-
-
 
 
     def _make_dataset(self, df, image_shape, t_train=None):
@@ -96,6 +95,7 @@ class load_data():
                 print "\t%d of %d" % (i, len(df))
         return data
 
+    @staticmethod
     def _format_dataset(df, for_train):
         # making arrays with all data in, is nessesary when doing validation split
         data = dict()
