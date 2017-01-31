@@ -60,7 +60,7 @@ if __name__ == '__main__':
         'l2_penalty': 0.01,
         'CHANNEL': 1,
         'LEARNING_RATE': 0.001,
-        'report_interval': 100 
+        'report_interval': 100
     }
 
     data = etl.load_data(train_path=TRAIN_PATH,

@@ -67,7 +67,7 @@ def conv_net(x, weights, biases, dropout, net):
     net['conv2'] = conv2d(net['pool1'], weights['wc2'], biases['bc2'])
     # Max Pooling (down-sampling)
     net['pool2'] = maxpool2d(net['conv2'], k=2)
-    ''' 
+    '''
     # Convolution Layer
     net['conv3'] = conv2d(net['pool2'], weights['wc3'], biases['bc3'])
     # Max Pooling (down-sampling)
@@ -124,13 +124,13 @@ def random_search(params_range, samplings):
     for instance in range(samplings):
         param = {}
         for param_name, value in params_range.items():
-            if type(value) == tuple:
+            if isinstance(value, tuple):
                 base, dist = value
                 if base == 0:
                     param[param_name] = dist.rvs()
                 else:
                     param[param_name] = base ** dist.rvs()
-            elif type(value) == np.ndarray:
+            elif isinstance(value, np.ndarray):
                 param[param_name] = np.random.choice(value)
             else:
                 param[param_name] = value

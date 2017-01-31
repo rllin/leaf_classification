@@ -108,7 +108,7 @@ class CnnClassifier:
         self.net = {}
         self.min_loss = 1e99
         self.last_ckpt, self.last_params, self.last_results = None, None, None
-	
+
         self.sess = tf.Session()
         self.saver = tf.train.Saver()
         self.sess.run(tf.global_variables_initializer())
@@ -132,9 +132,9 @@ class CnnClassifier:
         prediction = helpers.combine_f_i_nets(image_prediction, features_prediction, self.weights, self.biases, self.net)
         probability = tf.nn.softmax(prediction)
         '''
-	l2_loss = self.params['l2_penalty'] * (tf.nn.l2_loss(self.weights['f_wc1']) 
-                                               + tf.nn.l2_loss(self.weights['wc1']) 
-                                               + tf.nn.l2_loss(self.weights['wc2']) 
+	l2_loss = self.params['l2_penalty'] * (tf.nn.l2_loss(self.weights['f_wc1'])
+                                               + tf.nn.l2_loss(self.weights['wc1'])
+                                               + tf.nn.l2_loss(self.weights['wc2'])
                                                + tf.nn.l2_loss(self.weights['wd1']))
 	'''
         loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label))
@@ -250,8 +250,8 @@ class CnnClassifier:
         self.saver.save(self.sess, '%s%s/%s.ckpt' % (model_folder, current_ckpt, current_ckpt))
         print 'saved checkpoint at %s%s' % (model_folder, current_ckpt)
         if self.last_ckpt is not None:
-            for file in glob.glob('%s%s/*' % (model_folder, self.last_ckpt)):
-                os.remove(file)
+            for file_name in glob.glob('%s%s/*' % (model_folder, self.last_ckpt)):
+                os.remove(file_name)
             os.rmdir('%s%s/' % (model_folder, self.last_ckpt))
             print 'deleted checkpoint at %s%s' % (model_folder, self.last_ckpt)
         self.last_ckpt = current_ckpt

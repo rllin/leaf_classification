@@ -38,16 +38,30 @@ class load_data():
         image_shape = image_shape
         self._load(train_df, test_df, image_paths, image_shape)
 
+    def _path_to_dict(image_paths):
+        path_dict = dict()
+        for image_path in image_paths:
+            num_path = int(os.path.basename(image_path[:-4]))
+            path_dict[num_path] = image_path
+        return path_dict
+
+    def _merge_image_df(df, path_dict):
+        split_path_dict = dict()
+        for index, row in df.iterrows():
+            split_path_dict[row['id']] = path_dict[row['id']]
+        image_frame = pd.DataFrame(split_path_dict.values(), columns=['image'])
+        df_image =  pd.concat([image_frame, df], axis=1)
+        return df_image
 
     def _load(self, train_df, test_df, image_paths, image_shape):
         print "loading data ..."
         # load train.csv
         self.image_paths = image_paths
-        path_dict = self._path_to_dict(self.image_paths) # numerate image paths and make it a dict
+        path_dict = _path_to_dict(self.image_paths) # numerate image paths and make it a dict
         # merge image paths with data frame
 
-        self.train_image_df = self._merge_image_df(train_df, path_dict)
-        self.test_image_df = self._merge_image_df(test_df, path_dict)
+        self.train_image_df = _merge_image_df(train_df, path_dict)
+        self.test_image_df = _merge_image_df(test_df, path_dict)
         # label encoder-decoder (self. because we need it later)
         self.le = LabelEncoder().fit(self.train_image_df['species'])
         # labels for train
@@ -56,25 +70,11 @@ class load_data():
         train_data = self._make_dataset(self.train_image_df, image_shape, t_train)
         test_data = self._make_dataset(self.test_image_df, image_shape)
         # need to reformat the train for validation split reasons in the batch_generator
-        self.train = self._format_dataset(train_data, for_train=True)
-        self.test = self._format_dataset(test_data, for_train=False)
+        self.train = _format_dataset(train_data, for_train=True)
+        self.test = _format_dataset(test_data, for_train=False)
         print "data loaded"
 
 
-    def _path_to_dict(self, image_paths):
-        path_dict = dict()
-        for image_path in image_paths:
-            num_path = int(os.path.basename(image_path[:-4]))
-            path_dict[num_path] = image_path
-        return path_dict
-
-    def _merge_image_df(self, df, path_dict):
-        split_path_dict = dict()
-        for index, row in df.iterrows():
-            split_path_dict[row['id']] = path_dict[row['id']]
-        image_frame = pd.DataFrame(split_path_dict.values(), columns=['image'])
-        df_image =  pd.concat([image_frame, df], axis=1)
-        return df_image
 
 
     def _make_dataset(self, df, image_shape, t_train=None):
@@ -105,7 +105,7 @@ class load_data():
                 print "\t%d of %d" % (i, len(df))
         return data
 
-    def _format_dataset(self, df, for_train):
+    def _format_dataset(df, for_train):
         # making arrays with all data in, is nessesary when doing validation split
         data = dict()
         value = df.values()[0]
@@ -132,7 +132,7 @@ class load_data():
                 data['ids'][i] = key
         return data
 
-    def _augment_dataset(self, df):
+    def _augment_dataset(df):
         '''Run once to augment.  Just read in the future.'''
         new_dataset = []
         id_start = df['id'].max() + 1
@@ -146,7 +146,7 @@ class load_data():
                 new_image = '%s/%s%s' % (os.path.dirname(row['image']), new_row['id'], os.path.splitext(row['image'])[1])
                 new_row['image'] = new_image
                 new_dataset.append(new_row)
-                if type(angle) == int:
+                if isinstance(angle, int):
                     imsave(new_image, rotate(image, angle, resize=False))
                 elif angle == 'LR':
                     imsave(new_image, np.fliplr(image))
@@ -186,7 +186,7 @@ class batch_generator():
 
 
         # idcs that we care about for train
-        self._idcs_train = [idx for idx, id in enumerate(self._train['ts']) if id in self._classes]
+        self._idcs_train = [idx for idx, class_id in enumerate(self._train['ts']) if class_id in self._classes]
         self._train_ids = [self._train['ts'][i] for i in self._idcs_train]
 
         self._idcs_train, self._train_ids, self._idcs_valid, self._valid_ids = self._split(self._train_ids, self._idcs_train, self._val_size)

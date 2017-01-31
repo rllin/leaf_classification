@@ -43,7 +43,7 @@ def run(params_range, fixed_params, samplings=5):
             model.train(param['ITERATIONS'])
         except:
             print 'not enough memory'
-        
+
 
 if __name__ == '__main__':
     TRAIN_PATH = "./data/train_images.csv"    # has new augmented images
@@ -69,22 +69,22 @@ if __name__ == '__main__':
     np.random.seed(fixed_params['SEED'])
 
     params_range = {
-        'f_conv1_num': 8, 
+        'f_conv1_num': 8,
         'f_conv1_out': 512,
-        'conv1_num': 5, 
+        'conv1_num': 5,
         'conv1_out': 64,
-        'conv2_num': 7, 
-        'conv2_out': 32, 
+        'conv2_num': 7,
+        'conv2_out': 32,
         'conv3_num': 7,
         'conv3_out': 16,
-        'd_out': 1024, 
-        'f_d_out': 1024, 
+        'd_out': 1024,
+        'f_d_out': 1024,
         'dropout': (0, uniform(0.5, 0.5)),
         'f_dropout': (0, uniform(0.5, 0.5)),
         'l2_penalty': (10, randint(-3, -1)),
         'CHANNEL': 1,
         'LEARNING_RATE': (10, randint(-3, -1)),
-        'report_interval': 1e2 
+        'report_interval': 1e2
     }
     '''
     params_range = {
