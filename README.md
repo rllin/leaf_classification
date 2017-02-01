@@ -17,16 +17,30 @@ them later."
   - Images standardized to 128 x 128 with proportional scaling up to largest dimension of all the images (1706 x 1706) and then scaled back down
 
 * **Getting Started**
-  - installation & prerequisites
-  - how to run examples and tests
-    - include a `Procfile` to start any necessary servers or daemon processes
+  - Install nvidia driver according to:
+    - https://github.com/NVIDIA/nvidia-docker/wiki/Deploy-on-Amazon-EC2
+    - In order for it to survive restarts of your ec2 instance, refer to:
+      - https://github.com/NVIDIA/nvidia-docker/issues/137
+    - Use either Docker image
+      - sudo nvidia-docker run -itd --name=leaf -e "PASSWORD=password" -p 8754:8888 -p 6006:6006 rllin/gpu-tensorflow-python
+      - sudo nvidia-docker exec -it leaf bash
+    - or requirements.txt (not tested)
+      - pip install -r requirements.txt
 
 * **Detailed Usage**
-  - models and interface
-  - examples
-  - configuration
-  - middleware or plugins
-  - how it works
+  - util/helpers.py
+    - assorted network construction wrappers
+      - conv2d
+      - conv1d
+      - maxpool2d
+      - conv_net
+      - f_conv_net
+      - combine_f_i_nets
+    - assorted image manipulation
+      - padupto
+      - resize_proportionally
+      - scale_resize
+      - random_search
 
 * **References**
   - https://github.com/alrojo/tensorflow-tutorial/blob/master/lab4_Kaggle/lab4_Kaggle.ipynb
@@ -35,9 +49,6 @@ them later."
   - https://github.com/fluxcapacitor/pipeline/wiki/AWS-GPU-TensorFlow-Docker
   - https://github.com/NVIDIA/nvidia-docker/issues/137
 
-
-
-*
 ## Formatting
 
 * Call the file `README.md`.
@@ -49,9 +60,6 @@ them later."
           puts "hello #{str}!"
         end
         ```
-
-* Do not wrap lines. In emacs, enable the `longlines-mode` to make your document word wrap intelligently.
-
 
 ## Supporting Documentation
 
