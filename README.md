@@ -2,8 +2,6 @@
 
 ## Contents
 
-The `README.md` file and supporting documents should describe the following, in this order. If the file starts getting long, break it into pieces
-
 * **Project Titles** as a level-1 heading
   - with descriptive tagline: I should be informed and intrigued. Examples:
     - "Sinatra is a DSL for quickly creating web applications in Ruby with minimal
@@ -16,23 +14,12 @@ them later."
 
 * **Overview**
   - Mixed model of 2 layer convolutional neural net trained on images and 1 layer convolutional neural net trained on features.
+  - Images standardized to 128 x 128 with proportional scaling up to largest dimension of all the images (1706 x 1706) and then scaled back down
 
 * **Getting Started**
   - installation & prerequisites
   - how to run examples and tests
     - include a `Procfile` to start any necessary servers or daemon processes
-  - location of:
-    - code
-    - issue tracker
-    - wiki
-    - blog posts, screencasts, etc
-    - compiled documentation (add the project to [rdoc.info](http://rdoc.info))
-    - travis-ci results
-    - mailing list
-
-* **Design Goals**
-  - lightweight or full-featured?
-  - performance, flexibility, expressiveness?
 
 * **Detailed Usage**
   - models and interface
@@ -41,20 +28,16 @@ them later."
   - middleware or plugins
   - how it works
 
-* **Comparable Tools**
+* **References**
+  - https://github.com/alrojo/tensorflow-tutorial/blob/master/lab4_Kaggle/lab4_Kaggle.ipynb
+  - https://github.com/aymericdamien/TensorFlow-Examples/blob/master/notebooks/3_NeuralNetworks/convolutional_network.ipynb
+  - https://gist.github.com/danijar/8663d3bbfd586bffecf6a0094cd116f2
+  - https://github.com/fluxcapacitor/pipeline/wiki/AWS-GPU-TensorFlow-Docker
+  - https://github.com/NVIDIA/nvidia-docker/issues/137
 
-* **Developer info**
-  - Important Components
-  - layout of internal code tree
-  - Limitations and known issues
-  - performance and benchmarking
 
-* **Colophon**
-  - Credits -- everyone who has contributed code, libraries from which we've borrowed code.
-  - Copyright and License -- state the license type (typically "Apache 2.0" or "All Rights Reserved and Confidential") and refer to the `LICENSE.md` file. Don't paste the license contents in here.
-  - How to contribute
-  - References
 
+*
 ## Formatting
 
 * Call the file `README.md`.
@@ -68,8 +51,6 @@ them later."
         ```
 
 * Do not wrap lines. In emacs, enable the `longlines-mode` to make your document word wrap intelligently.
-
-
 
 
 ## Supporting Documentation
