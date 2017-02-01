@@ -22,6 +22,7 @@ them later."
     - In order for it to survive restarts of your ec2 instance, refer to:
       - https://github.com/NVIDIA/nvidia-docker/issues/137
     - Use either Docker image
+      - docker pull rllin/gpu-tensorflow-python
       - sudo nvidia-docker run -itd --name=leaf -e "PASSWORD=password" -p 8754:8888 -p 6006:6006 rllin/gpu-tensorflow-python
       - sudo nvidia-docker exec -it leaf bash
     - or requirements.txt (not tested)
