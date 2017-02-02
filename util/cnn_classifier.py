@@ -155,7 +155,10 @@ class CnnClassifier:
         #summaries_path = "tensorboard/%s/logs" % (timestamp)
         #summarywriter = tf.train.SummaryWriter(summaries_path, self.sess.graph)
 	f = open('./tmp/logs/%s.txt' % timestamp, 'w')
-	#f.write('only features\n')
+        if self.params['features_images'] == 'images and features':
+            f.write('images and features\n')
+        else:
+            f.write('only features\n')
         f.write(json.dumps(self.params, indent=4) + '\n')
         print "Iter \t Batch Loss \t Batch Accuracy \t Valid Loss \t Valid Accuracy \t Time delta\n"
         f.write("Iter \t Batch Loss \t Batch Accuracy \t Valid Loss \t Valid Accuracy \t Time delta\n")
