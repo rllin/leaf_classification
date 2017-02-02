@@ -31,24 +31,24 @@ if __name__ == '__main__':
     param = {
         'f_conv1_num': 8,
         'f_conv1_out': 512,
-        'conv1_num': 7,
-        'conv1_out': 32,
+        'conv1_num': 5,
+        'conv1_out': 128,
         'conv2_num': 7,
-        'conv2_out': 32,
+        'conv2_out': 256,
         #'conv2_out': 64,
         #'conv3_num': 7,
         #'conv3_out': 16,
         'd_out': 1024,
         'f_d_out': 1024,
-        'dropout': 0.57143340896097039,
-        #'dropout': 0.72962444598293352,
+        #'dropout': 0.57143340896097039,
+        'dropout': 0.72962444598293352,
         #'f_dropout': 0.66685430556951086,
 	'f_dropout': 0.8255444236474426,
         'l2_penalty': 0.01,
         'CHANNEL': 1,
         'LEARNING_RATE': 0.001,
         'report_interval': 100,
-        'features_images': 'features only'
+        'features_images': 'images and features'
     }
 
     data = etl.load_data(train_path=TRAIN_PATH,

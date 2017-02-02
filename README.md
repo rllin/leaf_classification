@@ -56,11 +56,12 @@ them later."
         "VALIDATION_SIZE": 0.2,
         "NUM_CLASSES": 99,
         "CLASS_SIZE": 1.0,
+        'features_images': 'features only'
       }
       ```
     - `LEARNING_RATE` looks like a fixed parameter, but it is searched over also.
   - These hyperparameters will achieve fairly high validation accuracy 80% for features only run after 5000 iterations.
-  - However, with images included with features, these hyperparamters don't seem to break 60% validation accuracy.
+    - However, running the above `python run_specific.py` is meant to be images + features, and these hyperparamters don't seem to break 60% validation accuracy.
 
 * **Next steps**
   - I've ordered next possible steps in decreasing combined ease of implementation and expected marginal benefit:
