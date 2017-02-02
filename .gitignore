@@ -1,4 +1,0 @@
-*.ckpt
-*.pem
-*.pyc
-./tensorboard
