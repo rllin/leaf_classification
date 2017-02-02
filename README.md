@@ -52,7 +52,7 @@
       - However, running the above `python run_specific.py` is meant to be images + features, and these hyperparamters don't seem to break 60% validation accuracy.
 
 #Next steps
-  * ** I've ordered next possible steps in decreasing combined ease of implementation and expected marginal benefit:**
+  - I've ordered next possible steps in decreasing combined ease of implementation and expected marginal benefit:**
     - Consider third convolutional layer to farther pool and shrink image.
     - Combine dropout with max norm rather than l2_loss as that seems to be suggested as best for preventing exploding or imploding weights.
     - Include image sizes as hyperparamters to search over.  Most of this code is in place already.
