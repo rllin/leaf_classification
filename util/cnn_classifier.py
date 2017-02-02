@@ -128,14 +128,12 @@ class CnnClassifier:
         else:
             prediction = features_prediction
         probability = tf.nn.softmax(prediction)
-        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label))
-        '''
+        #loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label))
 	l2_loss = self.params['l2_penalty'] * (tf.nn.l2_loss(self.weights['f_wc1'])
                                                + tf.nn.l2_loss(self.weights['wc1'])
                                                + tf.nn.l2_loss(self.weights['wc2'])
                                                + tf.nn.l2_loss(self.weights['wd1']))
         loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label) + l2_loss)
-	'''
         optimizer = tf.train.AdamOptimizer(learning_rate=self.params['LEARNING_RATE']).minimize(loss)
         correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(self.label, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
@@ -156,8 +154,10 @@ class CnnClassifier:
         #summarywriter = tf.train.SummaryWriter(summaries_path, self.sess.graph)
 	f = open('./tmp/logs/%s.txt' % timestamp, 'w')
         if self.params['features_images'] == 'images and features':
+            print 'images and features'
             f.write('images and features\n')
         else:
+            print 'only features'
             f.write('only features\n')
         f.write(json.dumps(self.params, indent=4) + '\n')
         print "Iter \t Batch Loss \t Batch Accuracy \t Valid Loss \t Valid Accuracy \t Time delta\n"
