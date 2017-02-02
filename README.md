@@ -52,11 +52,12 @@
       - However, running the above `python run_specific.py` is meant to be images + features, and these hyperparamters don't seem to break 60% validation accuracy.
 
 #Next steps
-  - I've ordered next possible steps in decreasing combined ease of implementation and expected marginal benefit:**
+  * **I've ordered next possible steps in decreasing combined ease of implementation and expected marginal benefit:**
     - Consider third convolutional layer to farther pool and shrink image.
     - Combine dropout with max norm rather than l2_loss as that seems to be suggested as best for preventing exploding or imploding weights.
     - Include image sizes as hyperparamters to search over.  Most of this code is in place already.
     - Write a better batching process that's more pipe like, perhaps workers create or find images based on size based on hyperparameters of image size.
+    - Note that util/cnn_classifier has decorators capable of assigning tensorflow variables as properties of the class without scoping issues thanks to one of the references below.  I had the class nice and clean with the decorators, but changed it to better debug.  I would change it back for clarity.
 
 #References
   - https://github.com/alrojo/tensorflow-tutorial/blob/master/lab4_Kaggle/lab4_Kaggle.ipynb
