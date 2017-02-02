@@ -22,26 +22,52 @@ them later."
     - In order for it to survive restarts of your ec2 instance, refer to:
       - https://github.com/NVIDIA/nvidia-docker/issues/137
     - Use either Docker image
-      - docker pull rllin/gpu-tensorflow-python
-      - sudo nvidia-docker run -itd --name=leaf -e "PASSWORD=password" -p 8754:8888 -p 6006:6006 rllin/gpu-tensorflow-python
-      - sudo nvidia-docker exec -it leaf bash
+      - `docker pull rllin/gpu-tensorflow-python`
+      - `sudo nvidia-docker run -itd --name=leaf -e "PASSWORD=password" -p 8754:8888 -p 6006:6006 rllin/gpu-tensorflow-python`
+      - `sudo nvidia-docker exec -it leaf bash`
     - or requirements.txt (not tested)
-      - pip install -r requirements.txt
+      - `pip install -r requirements.txt`
 
 * **Detailed Usage**
-  - util/helpers.py
-    - assorted network construction wrappers
-      - conv2d
-      - conv1d
-      - maxpool2d
-      - conv_net
-      - f_conv_net
-      - combine_f_i_nets
-    - assorted image manipulation
-      - padupto
-      - resize_proportionally
-      - scale_resize
-      - random_search
+  - `python run_specific.py` will start a training and validation session using the following hyperparamaters:
+      
+      ```json
+      {
+        "f_conv1_num": 8,
+        "f_conv1_out": 512,
+        "f_d_out": 1024,
+        "f_dropout": 0.8255444236474426,
+        "conv1_num": 5,
+        "conv1_out": 128,
+        "conv2_num": 7,
+        "conv2_out": 256,
+        "d_out": 1024,
+        "dropout": 0.7296244459829335,
+        "report_interval": 100,
+        "l2_penalty": 0.01,
+        "LEARNING_RATE": 0.001,
+        "TRAIN_SIZE": 1.0,
+        "WIDTH": 128,
+        "SEED": 42,
+        "BATCH_SIZE": 66,
+        "ITERATION": 5000.0,
+        "HEIGHT": 128,
+        "CHANNEL": 1,
+        "VALIDATION_SIZE": 0.2,
+        "NUM_CLASSES": 99,
+        "CLASS_SIZE": 1.0,
+      }
+      ```
+    - `LEARNING_RATE` looks like a fixed parameter, but it is searched over also.
+  - These hyperparameters will achieve fairly high validation accuracy 80% for features only run after 5000 iterations.
+  - However, with images included with features, these hyperparamters don't seem to break 60% validation accuracy.
+
+* **Next steps**
+  - I've ordered next possible steps in decreasing combined ease of implementation and expected marginal benefit:
+    - Consider third convolutional layer to farther pool and shrink image.
+    - Combine dropout with max norm rather than l2_loss as that seems to be suggested as best for preventing exploding or imploding weights.
+    - Include image sizes as hyperparamters to search over.  Most of this code is in place already.
+    - Write a better batching process that's more pipe like, perhaps workers create or find images based on size based on hyperparameters of image size.
 
 * **References**
   - https://github.com/alrojo/tensorflow-tutorial/blob/master/lab4_Kaggle/lab4_Kaggle.ipynb
@@ -49,20 +75,4 @@ them later."
   - https://gist.github.com/danijar/8663d3bbfd586bffecf6a0094cd116f2
   - https://github.com/fluxcapacitor/pipeline/wiki/AWS-GPU-TensorFlow-Docker
   - https://github.com/NVIDIA/nvidia-docker/issues/137
-
-## Formatting
-
-* Call the file `README.md`.
-* Write in markdown format.
-  - You should use triple backtick blocks for code, and supply a language prefix:
-
-        ```ruby
-        def hello(str)
-          puts "hello #{str}!"
-        end
-        ```
-
-## Supporting Documentation
-
-Besides a `README.md`, your repo should contain a `CHANGELOG.md` summarizing major code changes, a `LICENSE.md` describing the code's license (typically Apache 2.0 for our open-source projects, All Rights Reserved for internal projects), and a `notes/` directory that is a git submodule of the project's wiki. See the [style guide for repo organization](https://github.com/infochimps-labs/style_guide/blob/master/style-guide-for-repo-organization.md) for more details.
 
