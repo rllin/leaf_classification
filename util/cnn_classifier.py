@@ -121,11 +121,12 @@ class CnnClassifier:
 
     def setup(self):
         """Sets up convolution nets and calculates loss and other metrics."""
-        image_prediction = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
         features_prediction = helpers.f_conv_net(self.feature, self.weights, self.biases, self.f_keep_prob, self.net)
-
-        prediction = features_prediction + image_prediction
-        prediction = helpers.combine_f_i_nets(image_prediction, features_prediction, self.weights, self.biases, self.net)
+        if self.params['features_images'] == 'images and features':
+            image_prediction = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
+	    prediction = helpers.combine_f_i_nets(image_prediction, features_prediction, self.weights, self.biases, self.net)
+        else:
+            prediction = features_prediction
         probability = tf.nn.softmax(prediction)
         loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label))
         '''

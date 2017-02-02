@@ -20,7 +20,7 @@ if __name__ == '__main__':
         'WIDTH': 128,
         'BATCH_SIZE': 66, # do 64 make sure not larger than VALIDATION_SIZE *
         'NUM_CLASSES': 99,
-        'ITERATIONS': 5e3,
+        'ITERATIONS': 1e4,
         'SEED': 42,
         'TRAIN_SIZE': 1.0,
         'VALIDATION_SIZE': 0.2,
@@ -47,7 +47,8 @@ if __name__ == '__main__':
         'l2_penalty': 0.01,
         'CHANNEL': 1,
         'LEARNING_RATE': 0.001,
-        'report_interval': 100
+        'report_interval': 100,
+        'features_images': 'features only'
     }
 
     data = etl.load_data(train_path=TRAIN_PATH,
