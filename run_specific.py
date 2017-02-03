@@ -48,6 +48,7 @@ if __name__ == '__main__':
         'CHANNEL': 1,
         'LEARNING_RATE': 0.001,
         'report_interval': 100,
+        #'features_images': 'features only',
         'features_images': 'images and features'
     }
 
