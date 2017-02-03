@@ -13,8 +13,11 @@
       - `docker pull rllin/gpu-tensorflow-python`
       - `sudo nvidia-docker run -itd --name=leaf -e "PASSWORD=password" -p 8754:8888 -p 6006:6006 rllin/gpu-tensorflow-python`
       - `sudo nvidia-docker exec -it leaf bash`
+      - `cd ./leaf_classification`
+      - `git pull`
     - or requirements.txt (not tested)
       - `pip install -r requirements.txt`
+      - `git clone https://github.com/rllin/leaf_classification.git`
 
 #Detailed Usage
   * **`python run_specific.py` will start a training and validation session using the following hyperparamaters:**
