@@ -60,6 +60,7 @@
     - Combine dropout with max norm rather than l2_loss as that seems to be suggested as best for preventing exploding or imploding weights.
     - Include image sizes as hyperparamters to search over.  Most of this code is in place already.
     - Write a better batching process that's more pipe like, perhaps workers create or find images based on size based on hyperparameters of image size.
+    - Formalize testing for batching process.  I was testing this myself adhoc in jupyter notebooks.
     - Note that util/cnn_classifier has decorators capable of assigning tensorflow variables as properties of the class without scoping issues thanks to one of the references below.  I had the class nice and clean with the decorators, but changed it to better debug.  I would change it back for clarity.
 
 #References
