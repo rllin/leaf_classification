@@ -77,28 +77,32 @@ class CnnClassifier:
         # Construct model
         self.weights = {
             'f_wc1': tf.Variable(tf.random_normal([self.params['f_conv1_num'], 1, self.params['f_conv1_out']]), name='f_wc1'),
-            'wc1': tf.Variable(tf.random_normal([self.params['conv1_num'], self.params['conv1_num'], 1, self.params['conv1_out']]), name='wc1'),
-            'wc2': tf.Variable(tf.random_normal([self.params['conv2_num'], self.params['conv2_num'], self.params['conv1_out'], self.params['conv2_out']]), name='wc2'),
-            #'wc3': tf.Variable(tf.random_normal([self.params['conv3_num'], self.params['conv3_num'], self.params['conv2_out'], self.params['conv3_out']]), name='wc333'),
-            'wd1': tf.Variable(tf.random_normal([self.params['WIDTH'] / 4 * self.params['HEIGHT'] / 4 * self.params['conv2_out'], self.params['d_out']]), name='wd1'),
-            #'wd1': tf.Variable(tf.random_normal([self.params['WIDTH'] / 8 * self.params['HEIGHT'] / 8 * self.params['conv3_out'], self.params['d_out']]), name='wd1'),
-            'out': tf.Variable(tf.random_normal([self.params['d_out'], int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='out'),
             'f_out': tf.Variable(tf.random_normal([self.params['f_d_out'], int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='f_out'),
             'f_wd1': tf.Variable(tf.random_normal([64 * 3 / 2 * self.params['f_conv1_out'], self.params['f_d_out']]), name='f_out'),
-            'i_conv_out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE'])), int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='i_conv_out'),
             'f_conv_out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE'])), int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='f_conv_out'),
         }
         self.biases = {
             'f_bc1': tf.Variable(tf.random_normal([self.params['f_conv1_out']]), name='f_bc1'),
-            'bc1': tf.Variable(tf.random_normal([self.params['conv1_out']]), name='bc1'),
-            'bc2': tf.Variable(tf.random_normal([self.params['conv2_out']]), name='bc2'),
-            #'bc3': tf.Variable(tf.random_normal([self.params['conv3_out']]), name='bc3'),
-            'bd1': tf.Variable(tf.random_normal([self.params['d_out']]), name='bd1'),
-            'out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='b_out'),
             'f_out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='f_b_out'),
             'f_bd1': tf.Variable(tf.random_normal([self.params['f_d_out']]), name='f_b_out'),
             'f_i_conv_out': tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]))
         }
+        if self.params['features_images'] == 'images and features':
+            self.weights['wc1'] = tf.Variable(tf.random_normal([self.params['conv1_num'], self.params['conv1_num'], 1, self.params['conv1_out']]), name='wc1')
+            self.weights['wc2'] = tf.Variable(tf.random_normal([self.params['conv2_num'], self.params['conv2_num'], self.params['conv1_out'], self.params['conv2_out']]), name='wc2')
+            #'wc3': tf.Variable(tf.random_normal([self.params['conv3_num'], self.params['conv3_num'], self.params['conv2_out'], self.params['conv3_out']]), name='wc333'),
+            self.weights['wd1'] = tf.Variable(tf.random_normal([self.params['WIDTH'] / 4 * self.params['HEIGHT'] / 4 * self.params['conv2_out'], self.params['d_out']]), name='wd1')
+            #'wd1': tf.Variable(tf.random_normal([self.params['WIDTH'] / 8 * self.params['HEIGHT'] / 8 * self.params['conv3_out'], self.params['d_out']]), name='wd1'),
+            self.weights['out'] = tf.Variable(tf.random_normal([self.params['d_out'], int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='out')
+            self.weights['i_conv_out'] = tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE'])), int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='i_conv_out')
+
+            self.biases['bc1'] = tf.Variable(tf.random_normal([self.params['conv1_out']]), name='bc1')
+            self.biases['bc2'] = tf.Variable(tf.random_normal([self.params['conv2_out']]), name='bc2')
+            #'bc3': tf.Variable(tf.random_normal([self.params['conv3_out']]), name='bc3'),
+            self.biases['bd1'] = tf.Variable(tf.random_normal([self.params['d_out']]), name='bd1')
+            self.biases['out'] = tf.Variable(tf.random_normal([int(round(self.params['NUM_CLASSES'] * self.params['CLASS_SIZE']))]), name='b_out')
+
+
 
         self.batches = batches
 
@@ -125,14 +129,17 @@ class CnnClassifier:
         if self.params['features_images'] == 'images and features':
             image_prediction = helpers.conv_net(self.image, self.weights, self.biases, self.keep_prob, self.net)
 	    prediction = helpers.combine_f_i_nets(image_prediction, features_prediction, self.weights, self.biases, self.net)
+	    #loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label))
+	    l2_loss = self.params['l2_penalty'] * (tf.nn.l2_loss(self.weights['f_wc1'])
+					           + tf.nn.l2_loss(self.weights['wc1'])
+					           + tf.nn.l2_loss(self.weights['wc2'])
+					           + tf.nn.l2_loss(self.weights['wd1']))
         else:
             prediction = features_prediction
+	    #loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label))
+	    l2_loss = self.params['l2_penalty'] * (tf.nn.l2_loss(self.weights['f_wc1']))
+
         probability = tf.nn.softmax(prediction)
-        #loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label))
-	l2_loss = self.params['l2_penalty'] * (tf.nn.l2_loss(self.weights['f_wc1'])
-                                               + tf.nn.l2_loss(self.weights['wc1'])
-                                               + tf.nn.l2_loss(self.weights['wc2'])
-                                               + tf.nn.l2_loss(self.weights['wd1']))
         loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction, self.label) + l2_loss)
         optimizer = tf.train.AdamOptimizer(learning_rate=self.params['LEARNING_RATE']).minimize(loss)
         correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(self.label, 1))
